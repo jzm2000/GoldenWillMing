@@ -37,7 +37,7 @@ export const useArticleStore = defineStore('article', {
   actions: {
     loadArticles() {
       // 实际项目中可替换为API请求
-      console.log('加载文章数据')
+      console.log('加载日记数据')
     }
   }
 })

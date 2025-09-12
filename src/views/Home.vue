@@ -1,13 +1,19 @@
 <template>
   <div class="home">
+
     <!-- Hero Section -->
     <section class="hero">
+      <Navbar v-if="route.name == 'Home'" color="#fff"/>
       <div class="container">
         <div class="hero-content">
-          <h1>欢迎来到<span class="text-primary">我的个人博客</span></h1>
-          <p>探索技术世界，分享学习心得，记录成长历程</p>
+          <div class="flex_box">
+            <div class="flex_box hero-text-box">
+              <span class="hero-text" ref="heroText"></span>
+              <span class="line"></span>
+            </div>
+          </div>
           <div class="hero-buttons">
-            <router-link to="/articles" class="btn btn-primary">浏览文章</router-link>
+            <router-link to="/articles" class="btn btn-primary">浏览日记</router-link>
             <router-link to="/about" class="btn btn-secondary">了解更多</router-link>
           </div>
         </div>
@@ -42,7 +48,7 @@
     <section class="latest-articles">
       <div class="container">
         <div class="section-header">
-          <h2 class="section-title">最新文章</h2>
+          <h2 class="section-title">最新日记</h2>
           <router-link to="/articles" class="view-all-link">查看全部</router-link>
         </div>
         <div class="articles-grid">
@@ -77,7 +83,7 @@
       <div class="container">
         <div class="newsletter-content">
           <h2>订阅我的更新</h2>
-          <p>获取最新文章和技术资讯，直接发送到您的邮箱</p>
+          <p>获取最新日记和技术资讯，直接发送到您的邮箱</p>
           <form class="newsletter-form">
             <input type="email" placeholder="您的邮箱地址" class="email-input" />
             <button type="submit" class="btn btn-primary">订阅</button>
@@ -89,10 +95,17 @@
 </template>
 
 <script setup lang="jsx">
-import { ref } from 'vue'
+import Navbar from '@/components/Navbar.vue'
+import { ref,onMounted,onUnmounted } from 'vue'
 import { useArticleStore } from '../store/article'
+import {useRoute} from 'vue-router';
 const articleStore = useArticleStore();
-console.log(articleStore)
+const route = useRoute();
+let heroText = ref(null);
+let textList = ['天不生我金志明，人间万古如长夜。','日记里藏着时光的秘密。','日记是心灵的镜像，映照出最真实的自己。','日记是成长的刻度，标记着每一步蜕变。'];
+let textIndex = 0;
+let interval = null;
+let timeout = null;
 const latestArticles = ref(articleStore.getLatestArticles(3));
 const hoveredArticle = ref(null)
 
@@ -106,7 +119,7 @@ const formatDate = (dateString) => {
   })
 }
 
-// 处理文章卡片悬停效果
+// 处理日记卡片悬停效果
 const onArticleHover = (id) => {
   hoveredArticle.value = id
 }
@@ -114,27 +127,59 @@ const onArticleHover = (id) => {
 const onArticleLeave = () => {
   hoveredArticle.value = null
 }
+// 模拟打字效果
+const simulateTyping = (text, element,status = 1,delay = 100) => {
+  let index = status == 1 ? 0 : text.length;
+  //status 1 标识打字中，0 标识删除中
+  interval = setInterval(() => {
+    if (status == 0) {
+      // clearInterval(interval);
+      if (index <= 0) {
+        clearInterval(interval);
+        textIndex = (textIndex + 1) % textList.length;
+        console.log(textIndex)
+        timeout =setTimeout(()=>{
+          simulateTyping(textList[textIndex], heroText.value,1);
+        },1000);
+        return;
+      };
+      index--;
+      element.textContent = text.substring(0,index);
+    } else {
+      if (index >= text.length) {
+        clearInterval(interval);
+        timeout = setTimeout(()=>{
+          simulateTyping(textList[textIndex], heroText.value,0);
+        },2000)
+        return;
+      }
+      element.textContent += text[index];
+      index++;
+    }
+  }, 200);
+}; 
+onMounted(()=>{
+  simulateTyping(textList[textIndex], heroText.value)
+});
+onUnmounted(()=>{
+  console.log('unmounted')
+  clearInterval(interval);
+  clearTimeout(timeout);
+})
 </script>
 
 <style scoped>
 /* Hero Section */
 .hero {
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+  /* background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); */
+  background: url('@/assets/img/banner2.jpg') no-repeat center center;
+  background-size: 100%;
   color: white;
-  padding: 8rem 0 6rem;
   position: relative;
   overflow: hidden;
-}
-
-.hero::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.05" d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,213.3C672,224,768,224,864,208C960,192,1056,160,1152,154.7C1248,149,1344,171,1392,181.3L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat center bottom;
-  background-size: cover;
+  .container{
+     padding: 8rem 0 6rem;
+  }
 }
 
 .hero-content {
@@ -150,6 +195,7 @@ const onArticleLeave = () => {
   margin-bottom: 1.5rem;
   line-height: 1.2;
   color: white;
+  margin: 0;
 }
 
 .hero-content p {
@@ -457,6 +503,40 @@ const onArticleLeave = () => {
   .newsletter-form {
     flex-direction: column;
     align-items: center;
+  }
+}
+.hero-text-box{
+  margin: 20px auto;
+  padding: 16px;
+  background: rgba(51, 47, 43, 0.4);
+  justify-content: center;
+  border-radius: 8px;
+}
+.hero-text{
+  font-size: 20px;
+  line-height: 20px;
+}
+.line{
+  height: 20px;
+  width: 3px;
+  background-color: #fff;
+  color: #fff;
+  font-size:20px;
+  margin-left: 0px;
+  animation: hiddenShow 0.7s infinite;
+  border-radius: 8px;
+  margin-top: 1px;
+  margin-left: 3px;
+}
+@keyframes hiddenShow {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
   }
 }
 </style>

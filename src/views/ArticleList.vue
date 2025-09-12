@@ -1,6 +1,6 @@
 <template>
   <div class="article-list">
-    <h1>文章列表</h1>
+    <h1>日记列表</h1>
     <div class="article-card" v-for="article in articles" :key="article.id">
       <h2>{{ article.title }}</h2>
       <p class="date">{{ article.date }}</p>

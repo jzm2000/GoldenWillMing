@@ -4,14 +4,14 @@
       <div class="footer-content">
         <div class="footer-logo">
           <h3>我的个人博客</h3>
-          <p>分享我的学习心得和技术文章</p>
+          <p>分享我的学习心得和技术日记</p>
         </div>
         
         <div class="footer-links">
           <h4>快速链接</h4>
           <ul>
             <li><router-link to="/">首页</router-link></li>
-            <li><router-link to="/articles">文章</router-link></li>
+            <li><router-link to="/articles">日记</router-link></li>
             <li><router-link to="/about">关于</router-link></li>
           </ul>
         </div>

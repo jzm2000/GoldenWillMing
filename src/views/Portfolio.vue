@@ -258,7 +258,7 @@ const projects = ref([
   {
     id: 3,
     title: "个人博客系统",
-    description: "一个基于Markdown的个人博客系统，支持文章发布、分类标签、评论等功能。",
+    description: "一个基于Markdown的个人博客系统，支持日记发布、分类标签、评论等功能。",
     category: "web",
     date: "2023-06-10",
     images: [
@@ -273,7 +273,7 @@ const projects = ref([
     },
     details: [
       { id: 1, text: "个人博客系统采用Next.js框架构建，支持静态生成和服务端渲染，提高网站性能和SEO表现。" },
-      { id: 2, text: "内容管理使用Sanity.io作为无头CMS，通过GraphQL API获取数据，实现了Markdown编辑、文章分类、标签管理、评论功能等。" },
+      { id: 2, text: "内容管理使用Sanity.io作为无头CMS，通过GraphQL API获取数据，实现了Markdown编辑、日记分类、标签管理、评论功能等。" },
       { id: 3, text: "界面设计简洁现代，响应式布局适配各种设备屏幕，支持深色模式切换，提供良好的阅读体验。" }
     ]
   },

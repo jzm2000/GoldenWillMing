@@ -6,12 +6,12 @@
       <div class="content">
         {{ article.content }}
       </div>
-      <router-link to="/articles" class="back-link">← 返回文章列表</router-link>
+      <router-link to="/articles" class="back-link">← 返回日记列表</router-link>
     </div>
     <div v-else class="not-found">
-      <h2>文章未找到</h2>
-      <p>抱歉，请求的文章不存在。</p>
-      <router-link to="/articles" class="back-link">← 返回文章列表</router-link>
+      <h2>日记未找到</h2>
+      <p>抱歉，请求的日记不存在。</p>
+      <router-link to="/articles" class="back-link">← 返回日记列表</router-link>
     </div>
   </div>
 </template>

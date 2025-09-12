@@ -6,10 +6,10 @@
       返回列表
     </button>
 
-    <!-- 文章内容 -->
+    <!-- 日记内容 -->
     <article class="article-content">
       <div class="container">
-        <!-- 文章头部 -->
+        <!-- 日记头部 -->
         <header class="article-header">
           <div class="article-meta">
             <span class="article-category">{{ article.categoryLabel }}</span>
@@ -46,7 +46,7 @@
           </div>
         </header>
 
-        <!-- 文章特色图 -->
+        <!-- 日记特色图 -->
         <div class="featured-image-wrapper">
           <img 
             :src="article.imageUrl" 
@@ -56,12 +56,12 @@
           />
         </div>
 
-        <!-- 文章正文 -->
+        <!-- 日记正文 -->
         <div class="article-body">
           <div v-html="article.content" class="prose"></div>
         </div>
 
-        <!-- 文章标签 -->
+        <!-- 日记标签 -->
         <div class="article-tags">
           <span class="tags-label">标签：</span>
           <div class="tags-list">
@@ -69,7 +69,7 @@
           </div>
         </div>
 
-        <!-- 文章操作 -->
+        <!-- 日记操作 -->
         <div class="article-actions">
           <button class="action-button like-button" @click="toggleLike">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -87,9 +87,9 @@
           </button>
         </div>
 
-        <!-- 相关文章 -->
+        <!-- 相关日记 -->
         <section class="related-articles">
-          <h3 class="related-title">相关文章</h3>
+          <h3 class="related-title">相关日记</h3>
           <div class="related-grid">
             <div 
               v-for="related in relatedArticles" 
@@ -231,11 +231,11 @@
       </div>
     </article>
 
-    <!-- 文章目录 -->
+    <!-- 日记目录 -->
     <aside class="article-toc" :class="{ expanded: isTocExpanded }">
       <div class="toc-wrapper">
         <div class="toc-header">
-          <h3>文章目录</h3>
+          <h3>日记目录</h3>
           <button 
             class="toc-toggle" 
             @click="toggleToc"
@@ -268,7 +268,7 @@
       <div class="share-modal-backdrop" @click="closeShareModal"></div>
       <div class="share-modal-content">
         <div class="share-modal-header">
-          <h3>分享文章</h3>
+          <h3>分享日记</h3>
           <button class="share-modal-close" @click="closeShareModal">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
               <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -583,7 +583,7 @@ const formatCommentDate = (dateString) => {
   }
 }
 
-// 格式化文章日期
+// 格式化日记日期
 const formatArticleDate = (dateString) => {
   const options = { year: 'numeric', month: 'long', day: 'numeric' }
   return new Date(dateString).toLocaleDateString('zh-CN', options)
@@ -746,7 +746,7 @@ onUnmounted(() => {
   border-color: var(--primary-color);
 }
 
-/* 文章内容 */
+/* 日记内容 */
 .article-content {
   padding-top: 2rem;
 }
@@ -757,7 +757,7 @@ onUnmounted(() => {
   padding: 0 1.5rem;
 }
 
-/* 文章头部 */
+/* 日记头部 */
 .article-header {
   margin-bottom: 2rem;
 }
@@ -852,7 +852,7 @@ onUnmounted(() => {
   object-fit: cover;
 }
 
-/* 文章正文 */
+/* 日记正文 */
 .article-body {
   margin-bottom: 2rem;
 }
@@ -926,7 +926,7 @@ onUnmounted(() => {
   padding: 0;
 }
 
-/* 文章标签 */
+/* 日记标签 */
 .article-tags {
   display: flex;
   align-items: center;
@@ -963,7 +963,7 @@ onUnmounted(() => {
   color: white;
 }
 
-/* 文章操作 */
+/* 日记操作 */
 .article-actions {
   display: flex;
   gap: 1rem;
@@ -996,7 +996,7 @@ onUnmounted(() => {
   border-color: var(--primary-color);
 }
 
-/* 相关文章 */
+/* 相关日记 */
 .related-articles {
   margin-bottom: 3rem;
 }
@@ -1259,7 +1259,7 @@ onUnmounted(() => {
   border-top: 1px solid var(--border-color);
 }
 
-/* 文章目录 */
+/* 日记目录 */
 .article-toc {
   position: fixed;
   top: 120px;

@@ -3,13 +3,13 @@
     <div class="container">
       <router-link to="/" class="logo">
         <span class="logo-icon">🌟</span>
-        <span class="logo-text">我的个人博客</span>
+        <span class="logo-text">人明日记</span>
       </router-link>
 
       <!-- 桌面导航 -->
       <div class="nav-links desktop-nav">
         <NavItem to="/" icon="🏠">首页</NavItem>
-        <NavItem to="/articles" icon="📝">文章</NavItem>
+        <NavItem to="/articles" icon="📝">日记</NavItem>
         <NavItem to="/portfolio" icon="🎨">作品</NavItem>
         <NavItem to="/about" icon="👤">关于</NavItem>
         <NavItem to="/contact" icon="✉️">联系</NavItem>
@@ -26,10 +26,10 @@
     </div>
 
     <!-- 移动端导航菜单 -->
-    <div class="mobile-nav-menu" :class="{ 'open': isMobileMenuOpen }">
+    <div class="mobile-nav-menu" :class="{ 'open': isMobileMenuOpen }" v-show="isMobileMenuOpen">
       <div class="mobile-nav-links">
         <NavItem to="/" icon="🏠" @click="closeMobileMenu">首页</NavItem>
-        <NavItem to="/articles" icon="📝" @click="closeMobileMenu">文章</NavItem>
+        <NavItem to="/articles" icon="📝" @click="closeMobileMenu">日记</NavItem>
         <NavItem to="/portfolio" icon="🎨" @click="closeMobileMenu">作品</NavItem>
         <NavItem to="/about" icon="👤" @click="closeMobileMenu">关于</NavItem>
         <NavItem to="/contact" icon="✉️" @click="closeMobileMenu">联系</NavItem>
@@ -38,13 +38,18 @@
   </nav>
 </template>
 
-<script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+<script setup lang="ts">
+import { ref, onMounted, onUnmounted,withDefaults } from 'vue'
 // 子组件：导航项
 import { h } from 'vue'
 import { RouterLink } from 'vue-router'
+const props = withDefaults(defineProps<{
+  color?:string
+}>(),{
+  color:'#000'
+})
 
-const NavItem = (props, { slots }) => {
+const NavItem = (prop, { slots }) => {
   const baseClasses = 'nav-item flex items-center gap-1.5 px-3 py-2 rounded-lg transition-all duration-300'
   const activeClass = 'bg-primary/10 text-primary font-medium'
   const hoverClass = 'hover:bg-primary/5'
@@ -55,7 +60,7 @@ const NavItem = (props, { slots }) => {
   }
 
   return h(RouterLink, {
-    to: props.to,
+    to: prop.to,
     custom: true
   }, {
     default: ({ href, navigate, isActive }) => {
@@ -69,9 +74,9 @@ const NavItem = (props, { slots }) => {
           class: 'flex items-center gap-1.5'
         }, [
           h('span', {
-            class: 'nav-item-icon'
-          }, props.icon),
-          h('span', {}, slots.default?.())
+            class: 'nav-item-icon',
+          }, prop.icon),
+          h('span', { class:'nav-item_text'}, slots.default?.())
         ])
       ])
     }
@@ -112,9 +117,11 @@ onUnmounted(() => {
 })
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+:deep(.nav-item_text) {
+  color:v-bind('props.color')
+}
 .navbar {
-  background-color: white;
   padding: 1.25rem 0;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
@@ -130,9 +137,12 @@ onUnmounted(() => {
   right: 0;
   padding: 0.75rem 0;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  background-color: rgba(255, 255, 255, 0.98);
+  background-color: rgba(255, 255, 255, 0.68);
   backdrop-filter: blur(10px);
   animation: slideDown 0.3s ease;
+  :deep(.nav-item_text){
+    color: #000;
+  }
 }
 
 @keyframes slideDown {
@@ -213,7 +223,6 @@ onUnmounted(() => {
   color: var(--text-color);
   font-size: 0.95rem;
 }
-
 .nav-item-icon {
   font-size: 1.1rem;
 }

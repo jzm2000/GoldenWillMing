@@ -3,13 +3,13 @@
     <!-- 页面标题部分 -->
     <section class="articles-header">
       <div class="container">
-        <h1 class="section-title">文章列表</h1>
+        <h1 class="section-title">日记列表</h1>
         <p class="section-subtitle">探索我的技术分享与思考</p>
         <div class="title-underline"></div>
       </div>
     </section>
 
-    <!-- 文章筛选器 -->
+    <!-- 日记筛选器 -->
     <section class="filter-section">
       <div class="container">
         <div class="filter-wrapper">
@@ -19,7 +19,7 @@
               :class="{ active: activeFilter === 'all' }" 
               @click="activeFilter = 'all'"
             >
-              全部文章
+              全部日记
             </button>
             <button 
               class="filter-tab" 
@@ -48,7 +48,7 @@
             <input 
               type="text" 
               class="search-input" 
-              placeholder="搜索文章..." 
+              placeholder="搜索日记..." 
               v-model="searchQuery"
               @input="debouncedSearch"
             />
@@ -58,7 +58,7 @@
       </div>
     </section>
 
-    <!-- 文章列表 -->
+    <!-- 日记列表 -->
     <section class="articles-list-section">
       <div class="container">
         <div class="articles-grid" v-if="filteredArticles.length > 0">
@@ -107,7 +107,7 @@
         
         <div v-else class="no-articles">
           svg
-          <p>暂无符合条件的文章</p>
+          <p>暂无符合条件的日记</p>
           <button class="reset-button" @click="resetFilters">重置筛选条件</button>
         </div>
       </div>
@@ -167,7 +167,7 @@ const currentPage = ref(1)
 const itemsPerPage = ref(6)
 const searchTimeout = ref(null)
 
-// 模拟文章数据
+// 模拟日记数据
 const articles = ref([
   {
     id: 1,
@@ -471,7 +471,7 @@ onMounted(() => {
   color: var(--text-secondary);
 }
 
-/* 文章列表样式 */
+/* 日记列表样式 */
 .articles-list-section {
   padding: 3rem 0;
 }
@@ -575,7 +575,7 @@ onMounted(() => {
   gap: 0.5rem;
 }
 
-/* 无文章提示 */
+/* 无日记提示 */
 .no-articles {
   text-align: center;
   padding: 4rem 0;
