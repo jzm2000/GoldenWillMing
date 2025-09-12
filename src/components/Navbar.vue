@@ -28,11 +28,11 @@
     <!-- 移动端导航菜单 -->
     <div class="mobile-nav-menu" :class="{ 'open': isMobileMenuOpen }" v-show="isMobileMenuOpen">
       <div class="mobile-nav-links">
-        <NavItem to="/" icon="🏠" @click="closeMobileMenu">首页</NavItem>
-        <NavItem to="/articles" icon="📝" @click="closeMobileMenu">日记</NavItem>
-        <NavItem to="/portfolio" icon="🎨" @click="closeMobileMenu">作品</NavItem>
-        <NavItem to="/about" icon="👤" @click="closeMobileMenu">关于</NavItem>
-        <NavItem to="/contact" icon="✉️" @click="closeMobileMenu">联系</NavItem>
+        <NavItem to="/" icon="🏠" @click="closeMobileMenu" color="#000">首页</NavItem>
+        <NavItem to="/articles" icon="📝" @click="closeMobileMenu" color="#000">日记</NavItem>
+        <NavItem to="/portfolio" icon="🎨" @click="closeMobileMenu" color="#000">作品</NavItem>
+        <NavItem to="/about" icon="👤" @click="closeMobileMenu" color="#000">关于</NavItem>
+        <NavItem to="/contact" icon="✉️" @click="closeMobileMenu" color="#000">联系</NavItem>
       </div>
     </div>
   </nav>
@@ -76,14 +76,14 @@ const NavItem = (prop, { slots }) => {
           h('span', {
             class: 'nav-item-icon',
           }, prop.icon),
-          h('span', { class:'nav-item_text'}, slots.default?.())
+          h('span', { class:'nav-item_text',style:{color:prop.color} }, slots.default?.()) 
         ])
       ])
     }
   })
 }
 
-NavItem.props = ['to', 'icon']
+NavItem.props = ['to', 'icon','color']
 
 // 主组件状态
 const isSticky = ref(false)

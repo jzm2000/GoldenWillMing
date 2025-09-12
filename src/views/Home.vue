@@ -156,7 +156,7 @@ const simulateTyping = (text, element,status = 1,delay = 100) => {
       element.textContent += text[index];
       index++;
     }
-  }, 200);
+  }, delay);
 }; 
 onMounted(()=>{
   simulateTyping(textList[textIndex], heroText.value)
