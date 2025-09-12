@@ -168,7 +168,7 @@ onUnmounted(()=>{
 })
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 /* Hero Section */
 .hero {
   /* background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); */
@@ -537,6 +537,12 @@ onUnmounted(()=>{
   }
   100% {
     opacity: 0;
+  }
+}
+@media (max-width: 768px) {
+  .hero{
+    background: linear-gradient(135deg, #d0d5ec 0%, var(--secondary-color) 100%);
+    // background: url('@/assets/mobile/banner.jpg') no-repeat center center;
   }
 }
 </style>

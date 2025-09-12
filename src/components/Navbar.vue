@@ -39,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted,withDefaults } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 // 子组件：导航项
 import { h } from 'vue'
 import { RouterLink } from 'vue-router'
