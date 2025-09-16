@@ -21,35 +21,60 @@
     <div class="bg_cover">
       <section class="featured">
         <div class="container">
-          <div class="diary-title">精选日记</div>
-          <div class="diary-content">
-            <div class="diary-list" v-for="(item, index) in diaryList" :key="item.id">
-              <div class="diary-item">
-                <div class="diary-item-header">
-                  <div class="diary-item-avatar">
-                    <img :src="item.avatarUrl" :alt="item.nickName" />
+          <div class="left-user_info">
+            <div class="user-info">
+              <div class="user-avatar">
+                <img :src="userInfo.avatarUrl" :alt="userInfo.nickName" width="200px" height="200px"/>
+              </div>
+              <div class="user-name">{{userInfo.nickName}}</div>
+              <ul class="user-intro">
+                <li>
+                  <span>{{ userInfo.diaryNum }}</span>
+                  <span>创作</span>
+                </li>
+                <li>
+                  <span>{{ userInfo.likeNum }}</span>
+                  <span>点赞</span>
+                </li>
+                <li>
+                  <span>{{ userInfo.fansNum }}</span>
+                  <span>粉丝</span>
+                </li>
+
+              </ul>
+            </div>
+          </div>
+          <div class="right-diary_list">
+            <div class="diary-title">精选日记</div>
+            <div class="diary-content">
+              <div class="diary-list" v-for="(item) in diaryList" :key="item.id">
+                <div class="diary-item">
+                  <div class="diary-item-header">
+                    <div class="diary-item-avatar">
+                      <img :src="item.avatarUrl" :alt="item.nickName" />
+                    </div>
+                    <div class="diary-item-info">
+                      <div class="diary-item-nickname">{{item.nickName}}</div>
+                      <div class="diary-item-date">{{formatDate(item.dataTime)}}</div>
+                    </div>
+                    <div class="diary-item-stats" v-if="item.hot || item.viewCount">
+                      <span class="diary-item-hot" v-if="item.hot">🔥</span>
+                      <span class="diary-item-views" v-if="item.viewCount">{{item.viewCount}} 浏览</span>
+                    </div>
                   </div>
-                  <div class="diary-item-info">
-                    <div class="diary-item-nickname">{{item.nickName}}</div>
-                    <div class="diary-item-date">{{formatDate(item.dataTime)}}</div>
+                  <div class="diary-item-title">{{item.title}}</div>
+                  <div class="diary-item-content">{{item.content}}</div>
+                  <div class="diary-item-footer">
+                    <button class="diary-item-like">
+                      <i class="iconfont icon-aixin"></i>
+                    </button>
+                    <button class="diary-item-comment">
+                      <i class="iconfont icon-pinglun"></i>
+                    </button>
+                    <button class="diary-item-share">
+                      <i class="iconfont icon-fenxiang"></i>
+                    </button>
                   </div>
-                  <div class="diary-item-stats" v-if="item.hot || item.viewCount">
-                    <span class="diary-item-hot" v-if="item.hot">🔥</span>
-                    <span class="diary-item-views" v-if="item.viewCount">{{item.viewCount}} 浏览</span>
-                  </div>
-                </div>
-                <div class="diary-item-title">{{item.title}}</div>
-                <div class="diary-item-content">{{item.content}}</div>
-                <div class="diary-item-footer">
-                  <button class="diary-item-like">
-                    <i class="iconfont icon-aixin"></i>
-                  </button>
-                  <button class="diary-item-comment">
-                    <i class="iconfont icon-pinglun"></i>
-                  </button>
-                  <button class="diary-item-share">
-                    <i class="iconfont icon-fenxiang"></i>
-                  </button>
                 </div>
               </div>
             </div>
@@ -110,7 +135,7 @@
 
 <script setup lang="jsx">
 import Navbar from '@/components/Navbar.vue'
-import { ref,onMounted,onUnmounted } from 'vue'
+import { ref,reactive,onMounted,onUnmounted } from 'vue'
 import { useArticleStore } from '../store/article'
 import useCssVariables from '@/utils/useCssVariables';
 import avatar from "@/assets/img/1.jpg";
@@ -128,6 +153,15 @@ let primaryColor = getVariable('--secondary-color');
 const latestArticles = ref(articleStore.getLatestArticles(3));
 const hoveredArticle = ref(null)
 const diaryList = ref([{id:1,userId:12,title:"精选日记篇",content:"这是精选日记的内容",dataTime:"2025-07-01 12:00:00",nickName:"思念成疾",avatarUrl:avatar,hot:1,viewCount:100,likeNum:10,commentNum:10,shareNum:10}]);
+const userInfo = reactive({
+  avatarUrl: avatar,
+  nickName: '思念成疾',
+  createTime: '2025-07-01 12:00:00',
+  fansNum: 1000,
+  likeNum: 100,
+  diaryNum: 110,
+  
+});
 
 for(let i=0;i<5;i++){
   diaryList.value.push({...diaryList.value[0],id:i+1});
@@ -303,7 +337,115 @@ onUnmounted(()=>{
 .latest-articles {
   padding: 6rem 0;
 }
-
+.featured {
+  .container {
+    display: flex;
+    justify-content: space-between;
+    column-gap: 1rem;
+  }
+  .left-user_info{
+    width: 300px;
+    .user-info {
+      background-color: var(--card-bg);
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      transition: all 0.3s ease;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      text-align: center;
+      
+      &:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-hover);
+      }
+      
+      .user-avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        overflow: hidden;
+        margin: 0 auto 1.5rem;
+        position: relative;
+        border: 4px solid var(--accent-color-light);
+        
+        &::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+          border-radius: 50%;
+          z-index: -1;
+          transform: scale(1.05);
+        }
+        
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          border-radius: 50%;
+        }
+      }
+      
+      .user-name {
+        font-size: var(--font-size-xl);
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 1.5rem;
+        position: relative;
+        padding-bottom: 1rem;
+        
+        &::after {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 60px;
+          height: 3px;
+          background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+          border-radius: 1.5px;
+        }
+      }
+      
+      .user-intro {
+        display: flex;
+        justify-content: space-around;
+        padding: 0;
+        margin: 0;
+        list-style: none;
+        
+        li {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.25rem;
+          transition: all 0.3s ease;
+          padding: 0.5rem;
+          border-radius: 8px;
+          
+          &:hover {
+            background-color: rgba(67, 97, 238, 0.05);
+            transform: translateY(-2px);
+          }
+          
+          span:first-child {
+            font-size: var(--font-size-lg);
+            font-weight: 700;
+            color: var(--primary-color);
+          }
+          
+          span:last-child {
+            font-size: var(--font-size-sm);
+            color: var(--text-light);
+          }
+        }
+      }
+    }
+  }
+  .right-diary_list{
+    flex: 1;
+  }
+}
 .section-title {
   text-align: center;
   font-size: var(--font-size-3xl);
@@ -505,6 +647,36 @@ onUnmounted(()=>{
     flex-direction: column;
     align-items: center;
   }
+  
+  /* User info responsive styles */
+  .featured .container {
+    flex-direction: column;
+    gap: 2rem;
+  }
+  
+  .left-user_info {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+  
+  .user-info {
+    padding: 1.5rem !important;
+  }
+  
+  .user-avatar {
+    width: 80px !important;
+    height: 80px !important;
+  }
+  
+  .user-name {
+    font-size: var(--font-size-lg) !important;
+    margin-bottom: 1rem !important;
+  }
+  
+  .user-intro li span:first-child {
+    font-size: var(--font-size-base) !important;
+  }
 }
 .hero-text-box{
   margin: 20px auto;
@@ -545,24 +717,22 @@ onUnmounted(()=>{
   font-size: var(--font-size-2xl);
   font-weight: 700;
   text-align: center;
-  margin-bottom: 2.5rem;
+  margin-bottom: 1rem;
   color: var(--text-dark);
   position: relative;
+  background-color: var(--card-bg);
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  display: inline-block;
+  box-shadow: var(--shadow);
+  transition: all 0.3s ease;
+  width: 100%;
 }
 
-.diary-title::after {
-  content: '';
-  display: block;
-  width: 60px;
-  height: 3px;
-  background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
-  margin: 0.75rem auto 0;
-  border-radius: 1.5px;
-}
 
 .diary-content {
-  max-width: 800px;
-  margin: 0 auto;
+  // max-width: 800px;
+  // margin: 0 auto;
 }
 
 .diary-list {
