@@ -21,8 +21,9 @@ const route = useRoute();
 }
 
 .main-content {
-  flex: 1;
+  /* flex: 1; */
   transition: all 0.3s ease;
+  min-height: calc(100vh - 205px);
 }
 
 /* 为粘性导航栏添加主内容区域的上边距调整 */

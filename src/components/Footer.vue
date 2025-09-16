@@ -35,7 +35,7 @@
   background-color: #35495e;
   color: white;
   padding: 3rem 0 1.5rem;
-  margin-top: 3rem;
+  /* margin-top: 3rem; */
 }
 
 .container {

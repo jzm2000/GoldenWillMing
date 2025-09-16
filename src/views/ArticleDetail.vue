@@ -32,7 +32,7 @@ onMounted(() => {
 
 <style scoped>
 .article-detail {
-  max-width: 800px;
+  width: 1200px;
   margin: 0 auto;
   padding: 2rem;
 }

@@ -11,9 +11,8 @@ import Contact from '../views/Contact.vue'
 const routes = [
   { path: '/', name: 'Home', component: Home },
   { path: '/about', name: 'About', component: About },
-  { path: '/articles', name: 'ArticleList', component: ArticleList },
+  { path: '/articles', name: 'Articles', component: Articles },
   { path: '/articles/:id', name: 'ArticleDetail', component: ArticleDetail },
-  { path: '/new-articles', name: 'Articles', component: Articles },
   { path: '/new-article/:id', name: 'Article', component: Article },
   { path: '/portfolio', name: 'Portfolio', component: Portfolio },
   { path: '/contact', name: 'Contact', component: Contact }

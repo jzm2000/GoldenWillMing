@@ -248,7 +248,7 @@ onUnmounted(() => {
   position: absolute;
   height: 3px;
   width: 100%;
-  background: var(--text-color);
+  background: var(--secondary-color);
   border-radius: 3px;
   transition: all 0.3s ease;
 }

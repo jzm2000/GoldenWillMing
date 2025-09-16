@@ -2,3 +2,34 @@
   display: flex;
   align-items: center;
 }
+@font-face {
+  font-family: "iconfont"; /* Project id 5023305 */
+  src: url('//at.alicdn.com/t/c/font_5023305_x0qje2bgus.woff2?t=1758017229927') format('woff2'),
+       url('//at.alicdn.com/t/c/font_5023305_x0qje2bgus.woff?t=1758017229927') format('woff'),
+       url('//at.alicdn.com/t/c/font_5023305_x0qje2bgus.ttf?t=1758017229927') format('truetype');
+}
+
+.iconfont {
+  font-family: "iconfont" !important;
+  font-size: 24px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-fenxiang:before {
+  content: "\e607";
+}
+
+.icon-pinglun:before {
+  content: "\e891";
+}
+
+.icon-aixin:before {
+  content: "\e83f";
+}
+
+.icon-aixin1:before {
+  content: "\e85c";
+}
+
