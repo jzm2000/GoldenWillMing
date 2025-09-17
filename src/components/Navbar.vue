@@ -10,7 +10,7 @@
       <div class="nav-links desktop-nav">
         <NavItem to="/" icon="🏠">首页</NavItem>
         <NavItem to="/articles" icon="📝">日记</NavItem>
-        <NavItem to="/portfolio" icon="🎨">作品</NavItem>
+        <!-- <NavItem to="/portfolio" icon="🎨">作品</NavItem> -->
         <NavItem to="/about" icon="👤">关于</NavItem>
         <NavItem to="/contact" icon="✉️">联系</NavItem>
       </div>
@@ -30,7 +30,7 @@
       <div class="mobile-nav-links">
         <NavItem to="/" icon="🏠" @click="closeMobileMenu" color="#000">首页</NavItem>
         <NavItem to="/articles" icon="📝" @click="closeMobileMenu" color="#000">日记</NavItem>
-        <NavItem to="/portfolio" icon="🎨" @click="closeMobileMenu" color="#000">作品</NavItem>
+        <!-- <NavItem to="/portfolio" icon="🎨" @click="closeMobileMenu" color="#000">作品</NavItem> -->
         <NavItem to="/about" icon="👤" @click="closeMobileMenu" color="#000">关于</NavItem>
         <NavItem to="/contact" icon="✉️" @click="closeMobileMenu" color="#000">联系</NavItem>
       </div>

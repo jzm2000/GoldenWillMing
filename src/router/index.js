@@ -15,7 +15,8 @@ const routes = [
   { path: '/articles/:id', name: 'ArticleDetail', component: ArticleDetail },
   { path: '/new-article/:id', name: 'Article', component: Article },
   { path: '/portfolio', name: 'Portfolio', component: Portfolio },
-  { path: '/contact', name: 'Contact', component: Contact }
+  { path: '/contact', name: 'Contact', component: Contact },
+  { path: '/write-diary',name: 'WriteDiary',component:()=>import("@/views/WriteDiary.vue")}
 ]
 
 const router = createRouter({

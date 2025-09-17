@@ -20,20 +20,20 @@
               <InfoCard 
                 icon="email" 
                 title="电子邮箱"
-                content="contact@example.com"
-                link="mailto:contact@example.com"
+                content="2842688813@qq.com"
+                link="#"
               />
               <InfoCard 
                 icon="phone" 
                 title="联系电话"
-                content="+86 123 4567 8901"
-                link="tel:+8612345678901"
+                content="+86 保密"
+                link="#"
               />
               <InfoCard 
                 icon="location" 
                 title="工作地点"
-                content="北京市海淀区中关村科技园区"
-                link="https://maps.google.com"
+                content="江西省南昌市青山湖区"
+                link="#"
               />
               <InfoCard 
                 icon="time" 
@@ -43,7 +43,7 @@
             </div>
 
             <!-- 社交媒体 -->
-            <div class="social-media">
+            <!-- <div class="social-media">
               <h3 class="social-title">关注我</h3>
               <div class="social-links">
                 <SocialLink 
@@ -67,7 +67,7 @@
                   url="#"
                 />
               </div>
-            </div>
+            </div> -->
 
             <!-- 个人简介 -->
             <div class="contact-bio">
@@ -85,7 +85,6 @@
                   专注于创建优雅、高效的用户界面和体验。无论是网站开发、应用设计还是品牌视觉，我都能提供专业的解决方案。欢迎随时联系我讨论您的项目需求。
                 </p>
                 <a href="#" class="download-resume">
-                  svg
                   下载简历
                 </a>
               </div>
@@ -151,7 +150,6 @@
               
               <div class="form-actions">
                 <div class="recaptcha-placeholder">
-                  svg
                   <span>通过验证后发送</span>
                 </div>
                 <button 
@@ -174,7 +172,7 @@
       <div class="success-modal-backdrop" @click="closeSuccessModal"></div>
       <div class="success-modal-content">
         <div class="success-icon">
-          svg
+        
         </div>
         <h3 class="success-title">发送成功！</h3>
         <p class="success-message">
@@ -268,30 +266,23 @@ const InfoCard = (props) => {
   const getIconComponent = () => {
     switch (props.icon) {
       case 'email':
-        return 'svg'
+        return '✉'
       case 'phone':
-        return 'svg'
+        return '📞'
       case 'location':
-        return 'svg'
+        return '📍'
       case 'time':
-        return 'svg'
+        return '🕒'
       default:
         return null
     }
   }
   
   return h('div', { class: 'info-card' }, [
-    h('div', { class: 'info-icon' }, getIconComponent()),
+    h('div', { class: 'info-icon',style:{ 'font-size' : '1.2rem'} }, getIconComponent()),
     h('div', { class: 'info-content' }, [
       h('h3', { class: 'info-title' }, props.title),
       h('p', { class: 'info-text' }, 
-        props.link ? 
-          h('a', {
-            href: props.link,
-            target: props.link.includes('mailto:') || props.link.includes('tel:') ? '_self' : '_blank',
-            rel: 'noopener noreferrer',
-            class: 'info-link'
-          }, props.content) : 
           h('span', {}, props.content)
       )
     ])

@@ -67,12 +67,15 @@
                   <div class="diary-item-footer">
                     <button class="diary-item-like">
                       <i class="iconfont icon-aixin"></i>
+                      {{ item.likeNum }}
                     </button>
                     <button class="diary-item-comment">
-                      <i class="iconfont icon-pinglun"></i>
+                      <span>💬</span>
+                      {{ item.commentNum }}
                     </button>
-                    <button class="diary-item-share">
-                      <i class="iconfont icon-fenxiang"></i>
+                    <button class="diary-item-view">
+                      <span>👁️</span>
+                      {{item.viewCount}}
                     </button>
                   </div>
                 </div>
@@ -152,7 +155,7 @@ let timeout = null;
 let primaryColor = getVariable('--secondary-color');
 const latestArticles = ref(articleStore.getLatestArticles(3));
 const hoveredArticle = ref(null)
-const diaryList = ref([{id:1,userId:12,title:"精选日记篇",content:"这是精选日记的内容",dataTime:"2025-07-01 12:00:00",nickName:"思念成疾",avatarUrl:avatar,hot:1,viewCount:100,likeNum:10,commentNum:10,shareNum:10}]);
+const diaryList = ref([{id:1,userId:12,title:"精选日记篇",content:"这是精选日记的内容",dataTime:"2025-07-01 12:00:00",nickName:"思念成疾",avatarUrl:avatar,hot:1,viewCount:100,likeNum:10,commentNum:10,watchNum:10}]);
 const userInfo = reactive({
   avatarUrl: avatar,
   nickName: '思念成疾',
@@ -718,21 +721,16 @@ onUnmounted(()=>{
   font-weight: 700;
   text-align: center;
   margin-bottom: 1rem;
-  color: var(--text-dark);
+  background: var(--card-bg);
+  color: var(--text-color);
   position: relative;
-  background-color: var(--card-bg);
   padding: 1rem 1.5rem;
   border-radius: 12px;
   display: inline-block;
   box-shadow: var(--shadow);
   transition: all 0.3s ease;
   width: 100%;
-}
-
-
-.diary-content {
-  // max-width: 800px;
-  // margin: 0 auto;
+  line-height:1;
 }
 
 .diary-list {
@@ -752,7 +750,7 @@ onUnmounted(()=>{
 }
 
 .diary-item:hover {
-  transform: translateY(-5px);
+  transform: translateX(5px);
   box-shadow: 0 12px 36px rgba(0, 0, 0, 0.1);
 }
 
@@ -828,19 +826,24 @@ onUnmounted(()=>{
 
 .diary-item-like,
 .diary-item-comment,
-.diary-item-share {
+.diary-item-share,
+.diary-item-view {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
   background: none;
   border: none;
   font-size: var(--font-size-lg);
   cursor: pointer;
-  padding: 0.5rem;
+  padding: 0.2rem;
   border-radius: 8px;
   transition: all 0.3s ease;
 }
 
 .diary-item-like:hover,
 .diary-item-comment:hover,
-.diary-item-share:hover {
+.diary-item-share:hover,
+.diary-item-view:hover {
   background-color: var(--bg-color);
   transform: scale(1.1);
 }
