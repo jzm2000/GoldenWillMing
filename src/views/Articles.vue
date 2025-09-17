@@ -56,7 +56,7 @@
             />
 
             <!-- 创建日记按钮 -->
-            <div class="create-diary-section">
+            <div class="create-diary-section" @click="writeNewDiary">
               <button class="create-diary-btn">
                 <span class="create-icon">✏️</span>
                 写新日记
@@ -375,6 +375,10 @@ const resetFilters = () => {
 const getCategoryName = (categoryId) => {
   const category = categories.value.find(cat => cat.id === categoryId)
   return category ? category.name : '未知'
+}
+
+const writeNewDiary = () => {
+  router.push({ name: 'WriteDiary',query:{ isEdit:false } })
 }
 
 onMounted(() => {

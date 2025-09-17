@@ -13,6 +13,7 @@
         <!-- <NavItem to="/portfolio" icon="🎨">作品</NavItem> -->
         <NavItem to="/about" icon="👤">关于</NavItem>
         <NavItem to="/contact" icon="✉️">联系</NavItem>
+        <NavItem to="/login" icon="🔑">登录</NavItem>
       </div>
 
       <!-- 移动端导航切换按钮 -->

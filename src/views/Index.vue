@@ -1,10 +1,16 @@
 <script setup>
+import Navbar from '@/components/Navbar.vue'
+import Footer from '@/components/Footer.vue'
 import {useRoute} from 'vue-router';
 const route = useRoute();
 </script>
 
 <template>
-    <router-view></router-view>
+    <Navbar v-if="route.name != 'Home'"/>
+    <main class="main-content">
+      <router-view />
+    </main>
+    <Footer />
 </template>
 
 <style scoped>
