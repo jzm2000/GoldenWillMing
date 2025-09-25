@@ -112,7 +112,7 @@ import avatar from "@/assets/img/1.jpg";
 import { useUserStore } from '@/store/user.js';
 
 const userStore = useUserStore();
-console.log(userStore);
+console.log(userStore.userInfo);
 const {getVariable} = useCssVariables();
 
 import {useRoute} from 'vue-router';

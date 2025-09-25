@@ -50,6 +50,7 @@
               placeholder="请输入用户名"
               class="form-input"
               required
+              autocomplete="username"
             />
           </div>
         </div>
@@ -65,6 +66,8 @@
               placeholder="请输入密码"
               class="form-input"
               required
+              autocomplete="current-password"
+              minlength="4"
             />
           </div>
         </div>
@@ -93,6 +96,7 @@
               placeholder="请设置用户名"
               class="form-input"
               required
+              autocomplete="username"
             />
           </div>
         </div>
@@ -117,20 +121,21 @@
           <div class="input-wrapper">
             <span class="input-icon">🔒</span>
             <input
-              type="password"
+              :type="showRegisterPassword ? 'text' : 'password'"
               id="register-password"
               v-model="registerForm.password"
               placeholder="请设置密码（至少8位）"
               class="form-input"
               required
-              minlength="8"
+              minlength="4"
+              autocomplete="current-password"
             />
             <button 
               type="button" 
               class="toggle-password"
               @click="togglePasswordVisibility('register')"
             >
-              {{ showRegisterPassword ? '👁️' : '👁️‍🗨️' }}
+              <i style="font-size:24px" :class="['iconfont',showRegisterPassword ? 'icon-yanjing_xianshi_o':'icon-yanjing_yincang_o']"></i>
             </button>
           </div>
         </div>
@@ -146,6 +151,8 @@
               placeholder="请再次输入密码"
               class="form-input"
               required
+              minlength="4"
+              autocomplete="current-password"
             />
           </div>
         </div>
@@ -197,7 +204,7 @@ const router = useRouter();
 // 表单状态管理
 const activeTab = ref('login');
 const showLoginPassword = ref(false);
-const showRegisterPassword = ref(false);
+const showRegisterPassword = ref(true);
 import { useUserStore } from "@/store/user.js";
 const userStore = useUserStore();
 // 登录表单数据
@@ -239,7 +246,7 @@ const handleLogin = () => {
     if(res.code === 200){
       userStore.setToken(res.data);
       await getUserInfoHandle();
-      // router.push('/');
+      router.push('/');
     }else {
       // alert(res.msg);
     };
