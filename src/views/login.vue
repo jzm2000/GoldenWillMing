@@ -46,7 +46,7 @@
             <input
               type="text"
               id="login-username"
-              v-model="loginForm.username"
+              v-model="loginForm.account"
               placeholder="请输入用户名"
               class="form-input"
               required
@@ -89,7 +89,7 @@
             <input
               type="text"
               id="register-username"
-              v-model="registerForm.username"
+              v-model="registerForm.account"
               placeholder="请设置用户名"
               class="form-input"
               required
@@ -191,24 +191,25 @@
 <script setup>
 import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
-
+import { login,getUserInfo } from "@/api/index.js";
 const router = useRouter();
 
 // 表单状态管理
 const activeTab = ref('login');
 const showLoginPassword = ref(false);
 const showRegisterPassword = ref(false);
-
+import { useUserStore } from "@/store/user.js";
+const userStore = useUserStore();
 // 登录表单数据
 const loginForm = reactive({
-  username: '',
+  account: '',
   password: '',
   rememberMe: false
 });
 
 // 注册表单数据
 const registerForm = reactive({
-  username: '',
+  account: '',
   email: '',
   password: '',
   confirmPassword: '',
@@ -233,13 +234,27 @@ const togglePasswordVisibility = (formType) => {
 const handleLogin = () => {
   // 这里添加实际的登录逻辑
   console.log('登录表单提交:', loginForm);
+  login(loginForm).then(async res=>{
+    console.log(res);
+    if(res.code === 200){
+      userStore.setToken(res.data);
+      await getUserInfoHandle();
+      // router.push('/');
+    }else {
+      // alert(res.msg);
+    };
+  })  
   
-  // 模拟登录成功
-  setTimeout(() => {
-    alert('登录成功！');
-    router.push('/');
-  }, 1000);
 };
+// 获取用户信息
+const getUserInfoHandle = async () => {
+  let res = await getUserInfo();
+  if(res.code === 200){
+    userStore.setUserInfo(res.data);
+  }else {
+    alert(res.msg);
+  }
+}
 
 // 处理注册
 const handleRegister = () => {

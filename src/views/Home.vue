@@ -85,39 +85,6 @@
         </div>
       </section>
 
-      <section class="latest-articles">
-        <div class="container">
-          <div class="section-header">
-            <h2 class="section-title">最新日记</h2>
-            <router-link to="/articles" class="view-all-link">查看全部</router-link>
-          </div>
-          <div class="articles-grid">
-            <div 
-              class="article-card" 
-              v-for="article in latestArticles" 
-              :key="article.id"
-              @mouseenter="onArticleHover(article.id)"
-              @mouseleave="onArticleLeave(article.id)"
-            >
-              <div class="article-image">
-                <img :src="`https://picsum.photos/seed/${article.id}/600/400`" :alt="article.title" />
-              </div>
-              <div class="article-content">
-                <div class="article-meta">
-                  <span class="article-date">{{ formatDate(article.date) }}</span>
-                  <span class="article-category">{{ article.category }}</span>
-                </div>
-                <h3>{{ article.title }}</h3>
-                <p>{{ article.excerpt }}</p>
-                <router-link :to="{ name: 'ArticleDetail', params: { id: article.id } }" class="read-more">
-                  阅读更多 →
-                </router-link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <section class="newsletter">
         <div class="container">
           <div class="newsletter-content">
@@ -142,6 +109,10 @@ import { ref,reactive,onMounted,onUnmounted } from 'vue'
 import { useArticleStore } from '../store/article'
 import useCssVariables from '@/utils/useCssVariables';
 import avatar from "@/assets/img/1.jpg";
+import { useUserStore } from '@/store/user.js';
+
+const userStore = useUserStore();
+console.log(userStore);
 const {getVariable} = useCssVariables();
 
 import {useRoute} from 'vue-router';
@@ -336,8 +307,7 @@ onUnmounted(()=>{
   /* padding: 0 1.5rem; */
 }
 
-.featured,
-.latest-articles {
+.featured{
   padding: 6rem 0;
 }
 .featured {
@@ -449,38 +419,6 @@ onUnmounted(()=>{
     flex: 1;
   }
 }
-.section-title {
-  text-align: center;
-  font-size: var(--font-size-3xl);
-  margin-bottom: 3rem;
-  position: relative;
-}
-
-.section-title::after {
-  content: '';
-  display: block;
-  width: 80px;
-  height: 4px;
-  background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
-  margin: 1rem auto 0;
-  border-radius: 2px;
-}
-
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-}
-
-.section-header .section-title {
-  margin-bottom: 0;
-}
-
-.section-header .section-title::after {
-  display: none;
-}
-
 .view-all-link {
   color: var(--primary-color);
   font-weight: 500;
@@ -494,75 +432,6 @@ onUnmounted(()=>{
 }
 
 /* Articles Grid */
-.articles-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 2.5rem;
-}
-
-.article-card {
-  background-color: var(--card-bg);
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: var(--shadow);
-  transition: all 0.3s ease;
-}
-
-.article-card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-hover);
-}
-
-.article-image {
-  width: 100%;
-  height: 200px;
-  overflow: hidden;
-}
-
-.article-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.5s ease;
-}
-
-.article-card:hover .article-image img {
-  transform: scale(1.05);
-}
-
-.article-content {
-  padding: 1.5rem;
-}
-
-.article-meta {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
-  font-size: var(--font-size-sm);
-  color: var(--text-light);
-}
-
-.article-date,
-.article-category {
-  display: inline-block;
-}
-
-.article-category {
-  background-color: rgba(67, 97, 238, 0.1);
-  color: var(--primary-color);
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-weight: 500;
-}
-
-.article-content h3 {
-  font-size: var(--font-size-xl);
-  margin-bottom: 1rem;
-}
-
-.article-content p {
-  margin-bottom: 1.5rem;
-}
 
 .read-more {
   display: inline-flex;
@@ -634,10 +503,6 @@ onUnmounted(()=>{
   
   .hero-content p {
     font-size: var(--font-size-lg);
-  }
-  
-  .articles-grid {
-    grid-template-columns: 1fr;
   }
   
   .section-header {
@@ -750,8 +615,7 @@ onUnmounted(()=>{
 }
 
 .diary-item:hover {
-  transform: translateX(5px);
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5);
 }
 
 .diary-item-header {
