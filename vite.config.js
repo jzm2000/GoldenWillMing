@@ -4,6 +4,8 @@ import vueJsx from '@vitejs/plugin-vue-jsx'
 import compression from 'vite-plugin-compression'
 import { ViteImageOptimizer } from 'vite-plugin-image-optimizer'
 import { resolve } from "path";
+import Components from 'unplugin-vue-components/vite'
+import { NaiveUiResolver } from 'unplugin-vue-components/resolvers'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
@@ -34,7 +36,10 @@ export default defineConfig({
           }
         ]
       }
-    })
+    }),
+    Components({
+      resolvers: [NaiveUiResolver()],
+    }),
   ],
   resolve: {
     alias: {

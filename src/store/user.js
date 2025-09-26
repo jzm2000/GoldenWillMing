@@ -13,6 +13,10 @@ export const useUserStore = defineStore('user', {
       this.token = token
     }
   },
+  getters: {
+    getUserInfo: (state) => state.userInfo,
+    getToken: (state) => state.token
+  },
   persist: {
     enabled: true,
     strategies: [{

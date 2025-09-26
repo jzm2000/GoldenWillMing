@@ -13,7 +13,17 @@
         <!-- <NavItem to="/portfolio" icon="🎨">作品</NavItem> -->
         <NavItem to="/about" icon="👤">关于</NavItem>
         <NavItem to="/contact" icon="✉️">联系</NavItem>
-        <NavItem to="/login" icon="🔑">登录</NavItem>
+        <NavItem to="/login" icon="🔑" v-if="!getToken">登录/注册</NavItem>
+        <div class="" v-else>
+            <n-dropdown :options="options" show-arrow>
+              <div class="flex items-center user-info">
+                <span class="nickname">{{ userInfo.nickname }}</span>
+                <div class="user-avatar">
+                  <img :src="userInfo.avatar || defaultAvatar" alt="用户头像">
+                </div>
+              </div>
+            </n-dropdown>
+        </div>
       </div>
 
       <!-- 移动端导航切换按钮 -->
@@ -43,7 +53,17 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 // 子组件：导航项
 import { h } from 'vue'
-import { RouterLink } from 'vue-router'
+import { RouterLink } from 'vue-router';
+import { useUserStore } from "@/store/user.js";
+import { User, Edit, SwitchButton } from '@element-plus/icons-vue';
+import { NIcon } from 'naive-ui';
+import { storeToRefs } from "pinia";
+import defaultAvatar from '@/assets/img/avatar.jpeg'
+
+const userStore = useUserStore();
+const getToken = userStore.getToken;
+const { userInfo } = storeToRefs(userStore);
+console.log(userInfo);
 const props = withDefaults(defineProps<{
   color?:string
 }>(),{
@@ -89,7 +109,25 @@ NavItem.props = ['to', 'icon','color']
 // 主组件状态
 const isSticky = ref(false)
 const isMobileMenuOpen = ref(false)
-
+const options = [
+  {
+    label: '用户资料',
+    key: 'profile',
+    icon: renderIcon(User)
+  },
+  {
+    label: '退出登录',
+    key: 'logout',
+    icon:renderIcon(SwitchButton)
+  }
+];
+function renderIcon(icon: Component) {
+  return () => {
+    return h(NIcon, null, {
+      default: () => h(icon)
+    })
+  }
+}
 // 处理滚动事件
 const handleScroll = () => {
   isSticky.value = window.scrollY > 100
@@ -142,6 +180,9 @@ onUnmounted(() => {
   backdrop-filter: blur(10px);
   animation: slideDown 0.3s ease;
   :deep(.nav-item_text){
+    color: #000;
+  }
+  .nickname{
     color: #000;
   }
 }
@@ -314,6 +355,22 @@ onUnmounted(() => {
   font-size: 1.25rem;
   padding: 1rem 1.5rem;
   justify-content: center;
+}
+.user-info{
+   color: v-bind('props.color');
+   cursor: pointer;
+  .user-avatar{
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    margin-left: 0.5rem;
+    overflow: hidden;
+    img{
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
 }
 
 /* 响应式设计 */
