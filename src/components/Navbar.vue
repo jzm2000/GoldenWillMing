@@ -14,8 +14,8 @@
         <NavItem to="/about" icon="👤">关于</NavItem>
         <NavItem to="/contact" icon="✉️">联系</NavItem>
         <NavItem to="/login" icon="🔑" v-if="!getToken">登录/注册</NavItem>
-        <div class="" v-else>
-            <n-dropdown :options="options" show-arrow>
+        <div v-else>
+            <n-dropdown :options="options" show-arrow :on-select="handleSelect">
               <div class="flex items-center user-info">
                 <span class="nickname">{{ userInfo.nickname }}</span>
                 <div class="user-avatar">
@@ -49,7 +49,7 @@
   </nav>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 // 子组件：导航项
 import { h } from 'vue'
@@ -64,10 +64,11 @@ const userStore = useUserStore();
 const getToken = userStore.getToken;
 const { userInfo } = storeToRefs(userStore);
 console.log(userInfo);
-const props = withDefaults(defineProps<{
-  color?:string
-}>(),{
-  color:'#000'
+const props = defineProps({
+   color:{
+    type:String,
+    default:'#000'
+   }
 })
 
 const NavItem = (prop, { slots }) => {
@@ -118,10 +119,10 @@ const options = [
   {
     label: '退出登录',
     key: 'logout',
-    icon:renderIcon(SwitchButton)
+    icon:renderIcon(SwitchButton),
   }
 ];
-function renderIcon(icon: Component) {
+function renderIcon(icon) {
   return () => {
     return h(NIcon, null, {
       default: () => h(icon)
@@ -144,7 +145,11 @@ const closeMobileMenu = () => {
   isMobileMenuOpen.value = false
   document.body.style.overflow = ''
 }
-
+const handleSelect = (key) =>{
+  if(key === 'logout'){
+    userStore.logout();
+  }
+}
 // 生命周期钩子
 onMounted(() => {
   window.addEventListener('scroll', handleScroll)
