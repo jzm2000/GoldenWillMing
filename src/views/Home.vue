@@ -70,14 +70,16 @@
                       {{ item.likeNum }}
                     </button>
                     <button class="diary-item-comment">
-                      <span>💬</span>
+                      <i class="iconfont icon-pinglun"></i>
                       {{ item.commentNum }}
                     </button>
                     <button class="diary-item-view">
-                      <span>👁️</span>
+                      <i class="iconfont icon-yanjing_xianshi_o" style="font-size: 1.7rem;"></i>
                       {{item.viewCount}}
                     </button>
                   </div>
+                  <!-- 评论区 -->
+                   
                 </div>
               </div>
             </div>
@@ -685,6 +687,9 @@ onUnmounted(()=>{
   gap: 1rem;
   button{
     color: unset;
+  }
+  .iconfont{
+    font-size: 1.5rem;
   }
 }
 

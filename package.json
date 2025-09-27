@@ -13,7 +13,7 @@
     "@element-plus/icons-vue": "^2.3.2",
     "axios": "^1.12.2",
     "normalize.css": "^8.0.1",
-    "pinia": "^3.0.3",
+    "pinia": "^2.1.7",
     "pinia-plugin-persistedstate": "^4.5.0",
     "unplugin-auto-import": "^20.2.0",
     "unplugin-vue-components": "^29.1.0",

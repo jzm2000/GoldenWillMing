@@ -13,7 +13,7 @@
         <!-- <NavItem to="/portfolio" icon="🎨">作品</NavItem> -->
         <NavItem to="/about" icon="👤">关于</NavItem>
         <NavItem to="/contact" icon="✉️">联系</NavItem>
-        <NavItem to="/login" icon="🔑" v-if="!getToken">登录/注册</NavItem>
+        <NavItem to="/login" icon="🔑" v-if="!userStore.getToken">登录/注册</NavItem>
         <div v-else>
             <n-dropdown :options="options" show-arrow :on-select="handleSelect">
               <div class="flex items-center user-info">
@@ -61,7 +61,6 @@ import { storeToRefs } from "pinia";
 import defaultAvatar from '@/assets/img/avatar.jpeg'
 
 const userStore = useUserStore();
-const getToken = userStore.getToken;
 const { userInfo } = storeToRefs(userStore);
 console.log(userInfo);
 const props = defineProps({
