@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useUserStore } from "@/store/user.js";
+import router from "@/router";
 let userStore = null;
 const instance = axios.create({
     baseURL: location.protocol + import.meta.env.VITE_API_URL,
@@ -45,9 +46,11 @@ instance.interceptors.request.use(function (config) {
 
 // 添加响应拦截器
 instance.interceptors.response.use(function (response) {
-
+    if(response.data.code==401){
+        userStore.logout();
+    }
     return response;
 }, function (error) {
-    
+    console.log(error);
     return Promise.reject(error);
 });

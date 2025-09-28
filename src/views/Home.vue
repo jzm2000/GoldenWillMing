@@ -165,7 +165,7 @@ const getUserInfoHandle = async () => {
     });
     userInfo.avatar = res.data.avatar || avatar;
   }else {
-    alert(res.msg);
+    message.error(res.msg);
   }
 };
 getUserInfoHandle();
