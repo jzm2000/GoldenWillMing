@@ -41,6 +41,13 @@ export default defineConfig({
       resolvers: [NaiveUiResolver()],
     }),
   ],
+  css: {
+    preprocessorOptions: {
+      scss:{
+        api: 'modern-compiler'
+      }
+    }
+  },
   resolve: {
     alias: {
       "@": resolve(__dirname, "src"), // 路径别名

@@ -51,7 +51,7 @@ const selectCategory = (categoryId) => {
 const totalCount = () => {
   return props.diaries.length
 }
-console.log(props.diaries.length)
+
 const getCategoryCount = (categoryId) => {
   return props.diaries.filter(diary => diary.categoryId === categoryId).length
 }

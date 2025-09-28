@@ -3,7 +3,7 @@
     <div class="container">
       <router-link to="/" class="logo">
         <span class="logo-icon">🌟</span>
-        <span class="logo-text">人明日记</span>
+        <span class="logo-text">心情日记网</span>
       </router-link>
 
       <!-- 桌面导航 -->
@@ -62,7 +62,7 @@ import defaultAvatar from '@/assets/img/avatar.jpeg'
 
 const userStore = useUserStore();
 const { userInfo } = storeToRefs(userStore);
-console.log(userInfo);
+
 const props = defineProps({
    color:{
     type:String,

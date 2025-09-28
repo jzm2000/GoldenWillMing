@@ -4,7 +4,9 @@ const route = useRoute();
 </script>
 
 <template>
+  <n-message-provider>
     <router-view></router-view>
+  </n-message-provider>
 </template>
 
 <style scoped>

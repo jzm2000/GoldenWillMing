@@ -199,6 +199,9 @@
 import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import { login,getUserInfo } from "@/api/index.js";
+import {useMessage} from "naive-ui";
+const message = useMessage();
+
 const router = useRouter();
 
 // 表单状态管理
@@ -242,13 +245,15 @@ const handleLogin = () => {
   // 这里添加实际的登录逻辑
   console.log('登录表单提交:', loginForm);
   login(loginForm).then(async res=>{
-    console.log(res);
     if(res.code === 200){
       userStore.setToken(res.data);
-      await getUserInfoHandle();
+      // await getUserInfoHandle();
+      setTimeout(()=>{
+        message.success(res.msg);
+      },500);
       router.push('/');
     }else {
-      // alert(res.msg);
+      message.error(res.msg)
     };
   })  
   

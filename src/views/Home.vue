@@ -24,9 +24,9 @@
           <div class="left-user_info">
             <div class="user-info">
               <div class="user-avatar">
-                <img :src="userInfo.avatarUrl" :alt="userInfo.nickName" width="200px" height="200px"/>
+                <img :src="userInfo.avatar" :alt="userInfo.nickname" width="200px" height="200px"/>
               </div>
-              <div class="user-name">{{userInfo.nickName}}</div>
+              <div class="user-name">{{userInfo.nickname}}</div>
               <ul class="user-intro">
                 <li>
                   <span>{{ userInfo.diaryNum }}</span>
@@ -51,10 +51,10 @@
                 <div class="diary-item">
                   <div class="diary-item-header">
                     <div class="diary-item-avatar">
-                      <img :src="item.avatarUrl" :alt="item.nickName" />
+                      <img :src="item.avatar" :alt="item.nickname" />
                     </div>
                     <div class="diary-item-info">
-                      <div class="diary-item-nickname">{{item.nickName}}</div>
+                      <div class="diary-item-nickname">{{item.nickname}}</div>
                       <div class="diary-item-date">{{formatDate(item.dataTime)}}</div>
                     </div>
                     <div class="diary-item-stats" v-if="item.hot || item.viewCount">
@@ -65,15 +65,15 @@
                   <div class="diary-item-title">{{item.title}}</div>
                   <div class="diary-item-content">{{item.content}}</div>
                   <div class="diary-item-footer">
-                    <button class="diary-item-like">
+                    <button class="diary-item-like" @click="likeDiary(item.id)">
                       <i class="iconfont icon-aixin"></i>
                       {{ item.likeNum }}
                     </button>
-                    <button class="diary-item-comment">
+                    <button class="diary-item-comment" @click="commentDiary(item.id)">
                       <i class="iconfont icon-pinglun"></i>
                       {{ item.commentNum }}
                     </button>
-                    <button class="diary-item-view">
+                    <button class="diary-item-view" @click="viewDiary(item.id)">
                       <i class="iconfont icon-yanjing_xianshi_o" style="font-size: 1.7rem;"></i>
                       {{item.viewCount}}
                     </button>
@@ -108,13 +108,16 @@
 <script setup lang="jsx">
 import Navbar from '@/components/Navbar.vue'
 import { ref,reactive,onMounted,onUnmounted } from 'vue'
+import { getUserInfo } from "@/api/index.js";
 import { useArticleStore } from '../store/article'
 import useCssVariables from '@/utils/useCssVariables';
 import avatar from "@/assets/img/1.jpg";
 import { useUserStore } from '@/store/user.js';
+import { useMessage } from "naive-ui";
+const message = useMessage();
 
 const userStore = useUserStore();
-console.log(userStore.userInfo);
+
 const {getVariable} = useCssVariables();
 
 import {useRoute} from 'vue-router';
@@ -128,21 +131,56 @@ let timeout = null;
 let primaryColor = getVariable('--secondary-color');
 const latestArticles = ref(articleStore.getLatestArticles(3));
 const hoveredArticle = ref(null)
-const diaryList = ref([{id:1,userId:12,title:"精选日记篇",content:"这是精选日记的内容",dataTime:"2025-07-01 12:00:00",nickName:"思念成疾",avatarUrl:avatar,hot:1,viewCount:100,likeNum:10,commentNum:10,watchNum:10}]);
+const diaryList = ref([]);
 const userInfo = reactive({
-  avatarUrl: avatar,
-  nickName: '思念成疾',
-  createTime: '2025-07-01 12:00:00',
-  fansNum: 1000,
-  likeNum: 100,
-  diaryNum: 110,
-  
+  avatar: avatar,
+  nickname: '',
+  createTime: '',
+  fansNum: 0,
+  likeNum: 0,
+  diaryNum:0,
 });
 
-for(let i=0;i<5;i++){
-  diaryList.value.push({...diaryList.value[0],id:i+1});
-}
+// 逻辑业务的函数
+// 点赞日记
+function likeDiary(id){
 
+};
+// 评论日记
+function commentDiary(id){
+  message.warning("评论功能正在开发中。。。")
+};
+// 查看日记
+function viewDiary(id){
+
+};
+
+// 获取用户信息
+const getUserInfoHandle = async () => {
+  let res = await getUserInfo();
+  if(res.code === 200){
+    userStore.setUserInfo(res.data);
+    Object.keys(userInfo).forEach(key=>{
+      userInfo[key] = res.data[key] || 0;
+    });
+    userInfo.avatar = res.data.avatar || avatar;
+  }else {
+    alert(res.msg);
+  }
+};
+getUserInfoHandle();
+
+
+
+
+
+
+
+
+
+
+
+//逻辑业务的函数
 // 格式化日期
 const formatDate = (dateString) => {
   const date = new Date(dateString)
@@ -195,7 +233,6 @@ onMounted(()=>{
   simulateTyping(textList[textIndex], heroText.value)
 });
 onUnmounted(()=>{
-  console.log('unmounted')
   clearInterval(interval);
   clearTimeout(timeout);
 })
