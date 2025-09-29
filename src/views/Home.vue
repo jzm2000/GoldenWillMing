@@ -51,11 +51,11 @@
                 <div class="diary-item">
                   <div class="diary-item-header">
                     <div class="diary-item-avatar">
-                      <img :src="item.avatar" :alt="item.nickname" />
+                      <img :src="item.avatar || avatar" :alt="item.nickname" />
                     </div>
                     <div class="diary-item-info">
-                      <div class="diary-item-nickname">{{item.nickname}}</div>
-                      <div class="diary-item-date">{{formatDate(item.dataTime)}}</div>
+                      <div class="diary-item-nickname">{{item.author_name}}</div>
+                      <div class="diary-item-date">{{formatDate(item.created_at)}}</div>
                     </div>
                     <div class="diary-item-stats" v-if="item.hot || item.viewCount">
                       <span class="diary-item-hot" v-if="item.hot">🔥</span>
@@ -65,7 +65,7 @@
                   <div class="diary-item-title">{{item.title}}</div>
                   <div class="diary-item-content">{{item.content}}</div>
                   <div class="diary-item-footer">
-                    <button class="diary-item-like" @click="likeDiary(item.id)">
+                    <button class="diary-item-like" @click="likeDiaryHandle(item)">
                       <i class="iconfont icon-aixin"></i>
                       {{ item.likeNum }}
                     </button>
@@ -108,7 +108,7 @@
 <script setup lang="jsx">
 import Navbar from '@/components/Navbar.vue'
 import { ref,reactive,onMounted,onUnmounted } from 'vue'
-import { getUserInfo } from "@/api/index.js";
+import { getUserInfo,getPublicDiaryList,likeDiary } from "@/api/index.js";
 import { useArticleStore } from '../store/article'
 import useCssVariables from '@/utils/useCssVariables';
 import avatar from "@/assets/img/1.jpg";
@@ -142,9 +142,25 @@ const userInfo = reactive({
 });
 
 // 逻辑业务的函数
+// 公开日记列表初始化
+function initData(){
+  getPublicDiaryList().then(res=>{
+    if(res.code === 200){
+      diaryList.value = res.data.rows || [];
+    }else {
+      message.error(res.msg);
+    }
+  })
+}
 // 点赞日记
-function likeDiary(id){
-
+function likeDiaryHandle(item){
+  likeDiary({
+    id:item.id,
+    userId:userStore.userInfo.id,
+    action:'like'
+  }).then(res=>{
+    console.log(res);
+  })
 };
 // 评论日记
 function commentDiary(id){
@@ -168,8 +184,10 @@ const getUserInfoHandle = async () => {
     message.error(res.msg);
   }
 };
-getUserInfoHandle();
 
+// 函数执行
+getUserInfoHandle();
+initData();
 
 
 
@@ -187,7 +205,9 @@ const formatDate = (dateString) => {
   return date.toLocaleDateString('zh-CN', {
     year: 'numeric',
     month: 'long',
-    day: 'numeric'
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
   })
 }
 
