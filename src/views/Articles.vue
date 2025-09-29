@@ -94,7 +94,7 @@
             <!-- 日记列表 - 使用DiaryCard组件 -->
             <div class="diaries-grid">
               <DiaryCard 
-                v-for="diary in paginatedDiaries" 
+                v-for="diary in diaries" 
                 :key="diary.id"
                 :diary="diary"
                 :categories="categories"
@@ -116,7 +116,7 @@
             <Pagination 
               v-if="filteredDiaries.length > 0"
               :total-pages="totalPages"
-              :current-page="currentPage"
+              :current-page="queryParams.pageNum"
               @page-change="onPageChange"
             />
           </div>
@@ -141,10 +141,12 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted, reactive,computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useArticleStore } from '@/store/article'
-// 导入我们创建的可复用组件
+
+import { getDiaryList,categoryList } from "@/api/index.js"
+
 import DiaryCard from '@/components/DiaryCard.vue'
 import CategoryList from '@/components/CategoryList.vue'
 import TagsCloud from '@/components/TagsCloud.vue'
@@ -160,6 +162,10 @@ const selectedTags = ref([])
 const sortBy = ref('newest')
 const currentPage = ref(1)
 const pageSize = ref(6)
+const queryParams = reactive({
+  pageSize:10,
+  pageNum:1,
+});
 
 // 模拟数据 - 实际项目中应该从store获取
 const categories = ref([
@@ -194,90 +200,6 @@ const diaries = ref([
     comments: 3,
     views: 156
   },
-  {
-    id: 2,
-    title: 'Vue3组合式API学习笔记',
-    excerpt: '今天学习了Vue3的组合式API，真是太强大了！让代码组织更加清晰...',
-    content: '详细内容...',
-    date: '2023-04-14',
-    categoryId: 'study',
-    tags: [3, 7],
-    likes: 18,
-    comments: 5,
-    views: 124
-  },
-  {
-    id: 3,
-    title: '项目上线总结',
-    excerpt: '经过三个月的努力，项目终于上线了。过程虽然艰辛，但收获满满...',
-    content: '详细内容...',
-    date: '2023-04-10',
-    categoryId: 'work',
-    tags: [7, 8],
-    likes: 32,
-    comments: 7,
-    views: 215
-  },
-  {
-    id: 4,
-    title: '读《人类简史》有感',
-    excerpt: '这本书让我对人类历史有了全新的认识，思考了很多关于文明发展的问题...',
-    content: '详细内容...',
-    date: '2023-04-08',
-    categoryId: 'thought',
-    tags: [2, 6],
-    likes: 28,
-    comments: 4,
-    views: 167
-  },
-  {
-    id: 5,
-    title: '周末爬山游记',
-    excerpt: '远离城市的喧嚣，在大自然中找回内心的平静。山顶的风景果然不负所望...',
-    content: '详细内容...',
-    date: '2023-04-05',
-    categoryId: 'travel',
-    tags: [1, 5],
-    likes: 45,
-    comments: 8,
-    views: 278
-  },
-  {
-    id: 6,
-    title: '制定月度计划',
-    excerpt: '新的一月，新的开始。制定了详细的计划，希望能有条不紊地推进各项任务...',
-    content: '详细内容...',
-    date: '2023-04-01',
-    categoryId: 'life',
-    tags: [7, 1],
-    likes: 15,
-    comments: 2,
-    views: 98
-  },
-  {
-    id: 7,
-    title: '技术分享会心得',
-    excerpt: '参加了公司组织的技术分享会，学到了很多新的技术和思路...',
-    content: '详细内容...',
-    date: '2023-03-28',
-    categoryId: 'work',
-    tags: [3, 6],
-    likes: 22,
-    comments: 3,
-    views: 145
-  },
-  {
-    id: 8,
-    title: '深夜思考',
-    excerpt: '有时候会在深夜思考人生的意义，或许答案就在生活的点滴之中...',
-    content: '详细内容...',
-    date: '2023-03-25',
-    categoryId: 'thought',
-    tags: [2, 4],
-    likes: 30,
-    comments: 6,
-    views: 203
-  }
 ])
 
 const recentActivities = ref([
@@ -329,9 +251,7 @@ const filteredDiaries = computed(() => {
   return result
 })
 
-const totalPages = computed(() => {
-  return Math.ceil(filteredDiaries.value.length / pageSize.value)
-})
+const totalPages = ref(0);
 
 const paginatedDiaries = computed(() => {
   const startIndex = (currentPage.value - 1) * pageSize.value
@@ -340,9 +260,34 @@ const paginatedDiaries = computed(() => {
 })
 
 // 事件处理方法
+const initData = () =>{
+  getDiaryList({
+    ...queryParams,
+    categoryId:activeCategory.value || undefined,
+    title:searchQuery.value
+  }).then(res=>{
+    if(res.code==200){
+      diaries.value = res.data.rows;
+      totalPages.value = res.data.total;
+    }
+  })
+};
+
 const onCategoryChange = (categoryId) => {
   activeCategory.value = categoryId
-  currentPage.value = 1 // 切换分类时重置到第一页
+  queryParams.pageNum = 1;
+  initData();
+}
+// 获取分类列表
+const getCategoryList = async() =>{
+  let res = await categoryList();
+    if(res.code==200){
+      categories.value = res.data;
+      activeCategory.value = '';
+      initData();
+    }else{
+      categories.value = [];
+    }
 }
 
 const onTagToggle = (tagId) => {
@@ -376,6 +321,10 @@ const getCategoryName = (categoryId) => {
   const category = categories.value.find(cat => cat.id === categoryId)
   return category ? category.name : '未知'
 }
+// 事件执行
+getCategoryList();
+
+
 
 const writeNewDiary = () => {
   router.push({ name: 'WriteDiary',query:{ isEdit:false } })
@@ -383,11 +332,6 @@ const writeNewDiary = () => {
 
 onMounted(() => {
   articleStore.loadArticles()
-  
-  // 模拟数据加载效果
-  setTimeout(() => {
-    console.log('日记数据加载完成')
-  }, 500)
 })
 </script>
 

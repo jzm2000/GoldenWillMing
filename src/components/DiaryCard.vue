@@ -1,24 +1,24 @@
 <template>
   <div class="diary-card" @click="navigateToDiary">
     <div class="diary-card-header">
-      <span class="diary-date">{{ formatDate(diary.date) }}</span>
+      <span class="diary-date">{{ formatDate(diary.created_at) }}</span>
       <span class="diary-category">{{ getCategoryName() }}</span>
     </div>
     <h3 class="diary-card-title">{{ diary.title }}</h3>
-    <p class="diary-card-excerpt">{{ diary.excerpt }}</p>
+    <p class="diary-card-excerpt">{{ diary.content }}</p>
     <div class="diary-card-footer">
       <div class="diary-card-stats">
         <span class="stat">
-          <i class="iconfont icon-aixin"></i>
-          {{ diary.likes }}
+          <i :class="['iconfont',diary.isLiked ? 'icon-aixin1' : 'icon-aixin']"></i>
+          {{ diary.likeNum }}
         </span>
         <span class="stat">
-          <span class="stat-icon">💬</span>
-          {{ diary.comments }}
+          <span class="iconfont icon-pinglun"></span>
+          {{ diary.comments || 0 }}
         </span>
         <span class="stat">
-          <span class="stat-icon">👁️</span>
-          {{ diary.views }}
+          <span class="iconfont icon-yanjing_xianshi_o" style="font-size:1.6rem"></span>
+          {{ diary.views || 0 }}
         </span>
       </div>
       <div class="diary-card-tags">
@@ -56,7 +56,7 @@ const props = defineProps({
 const router = useRouter()
 
 const navigateToDiary = () => {
-  router.push({ name: 'ArticleDetail', params: { id: props.diary.id } })
+  console.log('跳转日记详情');
 }
 
 const getCategoryName = () => {
@@ -74,7 +74,9 @@ const formatDate = (dateString) => {
   return date.toLocaleDateString('zh-CN', {
     year: 'numeric',
     month: 'long',
-    day: 'numeric'
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
   })
 }
 </script>
@@ -143,7 +145,7 @@ const formatDate = (dateString) => {
 
 .diary-card-stats {
   display: flex;
-  gap: 1rem;
+  gap: 1.2rem;
   margin-bottom: 0.75rem;
 }
 
@@ -155,8 +157,8 @@ const formatDate = (dateString) => {
   color: var(--text-light);
 }
 
-.diary-card-stats .stat-icon {
-  font-size: 1rem;
+.diary-card-stats .iconfont {
+  font-size: 1.4rem;
 }
 
 .diary-card-tags {

@@ -4,8 +4,8 @@
     <ul class="categories-list">
       <li 
         class="category-item" 
-        :class="{ active: activeCategory === 'all' }"
-        @click="selectCategory('all')"
+        :class="{ active: activeCategory === '' }"
+        @click="selectCategory('')"
       >
         <span class="category-icon">📋</span>
         <span class="category-name">全部日记</span>
@@ -19,8 +19,8 @@
         @click="selectCategory(category.id)"
       >
         <span class="category-icon">{{ category.icon }}</span>
-        <span class="category-name">{{ category.name }}</span>
-        <span class="category-count">({{ getCategoryCount(category.id) }})</span>
+        <span class="category-name">{{ category.title }}</span>
+        <!-- <span class="category-count">({{ getCategoryCount(category.id) }})</span> -->
       </li>
     </ul>
   </div>
@@ -37,7 +37,7 @@ const props = defineProps({
     required: true
   },
   activeCategory: {
-    type: String,
+    type: [String,Number],
     default: 'all'
   }
 })

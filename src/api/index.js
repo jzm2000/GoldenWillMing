@@ -20,4 +20,7 @@ export const getDiaryList = (params) => get("/diary/list",params);
 export const getPublicDiaryList = (params) => get("/public/diary/list",params);
 // 点赞日记
 export const likeDiary = (params) => post("/diary/like",params);
+// 日记分类
+export const categoryList = (params) => get("/diary-category/categoryList",params);
+
 //#endregion 日记模块

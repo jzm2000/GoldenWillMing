@@ -39,8 +39,7 @@
                 <li>
                   <span>{{ userInfo.fansNum }}</span>
                   <span>粉丝</span>
-                </li>
-
+                </li> 
               </ul>
             </div>
           </div>
@@ -66,7 +65,7 @@
                   <div class="diary-item-content">{{item.content}}</div>
                   <div class="diary-item-footer">
                     <button class="diary-item-like" @click="likeDiaryHandle(item)">
-                      <i class="iconfont icon-aixin"></i>
+                      <i :class="['iconfont',item.isLiked ? 'icon-aixin1' : 'icon-aixin']"></i>
                       {{ item.likeNum }}
                     </button>
                     <button class="diary-item-comment" @click="commentDiary(item.id)">
@@ -144,7 +143,9 @@ const userInfo = reactive({
 // 逻辑业务的函数
 // 公开日记列表初始化
 function initData(){
-  getPublicDiaryList().then(res=>{
+  getPublicDiaryList({
+    userId:userStore.userInfo.id
+  }).then(res=>{
     if(res.code === 200){
       diaryList.value = res.data.rows || [];
     }else {
@@ -157,9 +158,12 @@ function likeDiaryHandle(item){
   likeDiary({
     id:item.id,
     userId:userStore.userInfo.id,
-    action:'like'
+    action:item.isLiked ? 'unlike' : 'like'
   }).then(res=>{
-    console.log(res);
+    if(res.code==200){
+      item.isLiked = item.isLiked ? 0 : 1;
+      item.likeNum = item.isLiked ? item.likeNum + 1 : item.likeNum - 1;
+    }
   })
 };
 // 评论日记
