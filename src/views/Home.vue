@@ -63,18 +63,18 @@
                   <div class="diary-item-title">{{item.title}}</div>
                   <div class="diary-item-content">{{item.content}}</div>
                   <div class="diary-item-footer">
-                    <button class="diary-item-like" @click="likeDiaryHandle(item)">
+                    <div class="diary-item-like" @click="likeDiaryHandle(item)">
                       <i :class="['iconfont',item.isLiked ? 'icon-aixin1' : 'icon-aixin']"></i>
                       {{ item.likeNum }}
-                    </button>
-                    <button class="diary-item-comment" @click="commentDiary(item.id)">
+                    </div>
+                    <div class="diary-item-comment" @click="commentDiary(item.id)">
                       <i class="iconfont icon-pinglun"></i>
                       {{ item.commentNum }}
-                    </button>
-                    <button class="diary-item-view" @click="viewDiary(item.id)">
-                      <i class="iconfont icon-yanjing_xianshi_o" style="font-size: 1.7rem;"></i>
+                    </div>
+                    <div class="diary-item-view" @click="viewDiary(item.id)">
+                      <i class="iconfont icon-yanjing_xianshi_o"></i>
                       {{item.viewCount}}
-                    </button>
+                    </div>
                   </div>
                   <!-- 评论区 -->
                    
@@ -790,7 +790,7 @@ onUnmounted(()=>{
 .diary-item-content {
   font-size: var(--font-size-base);
   color: var(--text-medium);
-  line-height: 1.8;
+  line-height: 1;
   margin-bottom: 1.5rem;
   text-align: justify;
 }
@@ -798,11 +798,13 @@ onUnmounted(()=>{
 .diary-item-footer {
   display: flex;
   gap: 1rem;
+  align-items: center;
   button{
     color: unset;
   }
   .iconfont{
     font-size: 1.5rem;
+    line-height: 1;
   }
 }
 
@@ -820,6 +822,7 @@ onUnmounted(()=>{
   padding: 0.2rem;
   border-radius: 8px;
   transition: all 0.3s ease;
+  line-height: 1;
 }
 
 .diary-item-like:hover,

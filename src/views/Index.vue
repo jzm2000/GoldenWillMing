@@ -1,6 +1,7 @@
 <script setup>
 import Navbar from '@/components/Navbar.vue'
 import Footer from '@/components/Footer.vue'
+import Setting from '@/components/Setting.vue'
 import {useRoute} from 'vue-router';
 const route = useRoute();
 </script>
@@ -11,6 +12,7 @@ const route = useRoute();
       <router-view />
     </main>
     <Footer />
+    <Setting />
 </template>
 
 <style scoped>

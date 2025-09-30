@@ -127,7 +127,7 @@
     <!-- 最近活动区域 -->
     <section class="recent-activities">
       <div class="container">
-        <h2 class="section-title">最近活动</h2>
+        <h2 class="section-title">最新消息</h2>
         <div class="activities-list">
           <div v-for="activity in recentActivities" :key="activity.id" class="activity-item">
             <span class="activity-icon">{{ activity.icon }}</span>
@@ -187,20 +187,7 @@ const tags = ref([
   { id: 8, name: '反思' }
 ])
 
-const diaries = ref([
-  {
-    id: 1,
-    title: '春日午后的咖啡时光',
-    excerpt: '阳光透过窗户洒在桌角，捧着一杯热咖啡，感受着春天的气息...',
-    content: '详细内容...',
-    date: '2023-04-15',
-    categoryId: 'life',
-    tags: [1, 5],
-    likes: 24,
-    comments: 3,
-    views: 156
-  },
-])
+const diaries = ref([])
 
 const recentActivities = ref([
   { id: 1, icon: '❤️', text: '张三点赞了你的日记', time: '1小时前' },
@@ -269,6 +256,9 @@ const initData = () =>{
     if(res.code==200){
       diaries.value = res.data.rows;
       totalPages.value = res.data.total;
+    }else{
+      diaries.value = [];
+      totalPages.value = 0;
     }
   })
 };

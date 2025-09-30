@@ -11,11 +11,17 @@
 .justify-center{
   justify-content: center;
 }
+button.small-btn{
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+}
 @font-face {
   font-family: "iconfont"; /* Project id 5023305 */
-  src: url('//at.alicdn.com/t/c/font_5023305_zjfbcl51ju.woff2?t=1758809854102') format('woff2'),
-       url('//at.alicdn.com/t/c/font_5023305_zjfbcl51ju.woff?t=1758809854102') format('woff'),
-       url('//at.alicdn.com/t/c/font_5023305_zjfbcl51ju.ttf?t=1758809854102') format('truetype');
+  src: url('//at.alicdn.com/t/c/font_5023305_zt222hjybg.woff2?t=1759214111162') format('woff2'),
+       url('//at.alicdn.com/t/c/font_5023305_zt222hjybg.woff?t=1759214111162') format('woff'),
+       url('//at.alicdn.com/t/c/font_5023305_zt222hjybg.ttf?t=1759214111162') format('truetype');
 }
 
 .iconfont {
@@ -24,6 +30,14 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-shezhi:before {
+  content: "\e630";
+}
+
+.icon-huojian:before {
+  content: "\e62b";
 }
 
 .icon-yanjing_xianshi_o:before {
@@ -45,7 +59,6 @@
 .icon-aixin:before {
   content: "\e83f";
 }
-
 .icon-aixin1:before {
   content: "\e85c";
   color: red;

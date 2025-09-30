@@ -3,8 +3,8 @@
     <div class="container">
       <div class="footer-content">
         <div class="footer-logo">
-          <h3>我的个人博客</h3>
-          <p>分享我的学习心得和技术日记</p>
+          <h3>心情日记网</h3>
+          <p>分享我的心情日记</p>
         </div>
         
         <div class="footer-links">

@@ -11,8 +11,8 @@
         <NavItem to="/" icon="🏠">首页</NavItem>
         <NavItem to="/articles" icon="📝">日记</NavItem>
         <!-- <NavItem to="/portfolio" icon="🎨">作品</NavItem> -->
-        <NavItem to="/about" icon="👤">关于</NavItem>
-        <NavItem to="/contact" icon="✉️">联系</NavItem>
+        <!-- <NavItem to="/about" icon="👤">关于</NavItem> -->
+        <!-- <NavItem to="/contact" icon="✉️">联系</NavItem> -->
         <NavItem to="/login" icon="🔑" v-if="!userStore.getToken">登录/注册</NavItem>
         <div v-else>
             <n-dropdown :options="options" show-arrow :on-select="handleSelect">
@@ -42,8 +42,8 @@
         <NavItem to="/" icon="🏠" @click="closeMobileMenu" color="#000">首页</NavItem>
         <NavItem to="/articles" icon="📝" @click="closeMobileMenu" color="#000">日记</NavItem>
         <!-- <NavItem to="/portfolio" icon="🎨" @click="closeMobileMenu" color="#000">作品</NavItem> -->
-        <NavItem to="/about" icon="👤" @click="closeMobileMenu" color="#000">关于</NavItem>
-        <NavItem to="/contact" icon="✉️" @click="closeMobileMenu" color="#000">联系</NavItem>
+        <!-- <NavItem to="/about" icon="👤" @click="closeMobileMenu" color="#000">关于</NavItem> -->
+        <!-- <NavItem to="/contact" icon="✉️" @click="closeMobileMenu" color="#000">联系</NavItem> -->
       </div>
     </div>
   </nav>
