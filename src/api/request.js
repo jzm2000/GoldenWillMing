@@ -6,7 +6,7 @@ const instance = axios.create({
     baseURL: location.protocol + import.meta.env.VITE_API_URL,
     timeout: 10000,
 });
-
+console.log(location.protocol + import.meta.env.VITE_API_URL);
 function handle(method = 'get',url,params,responseType='json',headers = {}){
     return new Promise((resolve,reject)=>{
         instance({
