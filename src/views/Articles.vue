@@ -8,7 +8,7 @@
         <div class="diary-stats">
           <span class="stat-item">
             <span class="stat-icon">📝</span>
-            <span class="stat-number">{{ totalDiaries }}</span>
+            <span class="stat-number">{{ totalPages }}</span>
             <span class="stat-label">篇日记</span>
           </span>
           <span class="stat-item">
@@ -34,15 +34,17 @@
                   v-model="searchQuery" 
                   placeholder="搜索日记内容..." 
                   class="search-input"
+                  @keyup.enter="initData(true)"
                 />
-                <span class="search-icon">🔍</span>
+                <span class="search-icon" @click="initData(true)">🔍</span>
               </div>
             </div>
 
             <!-- 分类列表组件 -->
             <CategoryList 
               :categories="categories" 
-              :diaries="diaries" 
+              :diaries="diaries"
+              :total-count="totalPages"
               :active-category="activeCategory"
               @category-change="onCategoryChange"
             />
@@ -70,7 +72,7 @@
             <div class="diary-filters">
               <div class="filters-left">
                 <span class="filter-info">
-                  共找到 {{ filteredDiaries.length }} 篇日记
+                  共找到 {{ diaries.length }} 篇日记
                 </span>
                 <span v-if="activeCategory !== 'all'" class="filter-active">
                   分类: {{ getCategoryName(activeCategory) }}
@@ -103,7 +105,7 @@
             </div>
 
             <!-- 空状态 -->
-            <div v-if="filteredDiaries.length === 0" class="empty-state">
+            <div v-if="diaries.length === 0" class="empty-state">
               <div class="empty-icon">📝</div>
               <h3>暂无符合条件的日记</h3>
               <p class="flex justify-center items-center" style="column-gap:0.5rem;">尝试调整筛选条件或<button class="create-diary-btn small" @click="writeNewDiary">创建新的日记</button></p>
@@ -114,9 +116,9 @@
 
             <!-- 分页组件 -->
             <Pagination 
-              v-if="filteredDiaries.length > 0"
+              v-if="totalPages > 1"
               :total-pages="totalPages"
-              :current-page="queryParams.pageNum"
+              v-model:current-page="queryParams.pageNum"
               @page-change="onPageChange"
             />
           </div>
@@ -196,7 +198,6 @@ const recentActivities = ref([
 ])
 
 // 计算属性
-const totalDiaries = computed(() => diaries.value.length)
 
 const filteredDiaries = computed(() => {
   let result = diaries.value
@@ -247,7 +248,10 @@ const paginatedDiaries = computed(() => {
 })
 
 // 事件处理方法
-const initData = () =>{
+const initData = (isSearch = false) =>{
+  if(isSearch){
+    queryParams.pageNum = 1;
+  };
   getDiaryList({
     ...queryParams,
     categoryId:activeCategory.value || undefined,
@@ -296,7 +300,8 @@ const clearAllTags = () => {
 }
 
 const onPageChange = (page) => {
-  currentPage.value = page
+  currentPage.value = page;
+  initData();
 }
 
 const resetFilters = () => {

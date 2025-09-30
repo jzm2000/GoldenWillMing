@@ -126,7 +126,7 @@ onMounted(()=>{
     &:hover .setting-form{
         display: flex;
         flex-direction: column;
-        row-gap: 0.5rem;
+        row-gap: 0.3rem;
     }
 }
 form{
@@ -144,8 +144,8 @@ form{
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    right: 56px;
-    background-color: var(--bg-color);
+    right: 51px;
+    background-color:#fff;
     border-radius: 0.5rem;
     padding: 0.5rem;
     display: none;
@@ -155,7 +155,7 @@ form{
         position: absolute;
         top: 50%;
         transform: translateY(-50%);
-        right: -11px;
+        right: -7px;
         width: 0;
         height: 0;
         border-top: 6px solid transparent;

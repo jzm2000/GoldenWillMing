@@ -41,6 +41,17 @@
       <div class="mobile-nav-links">
         <NavItem to="/" icon="🏠" @click="closeMobileMenu" color="#000">首页</NavItem>
         <NavItem to="/articles" icon="📝" @click="closeMobileMenu" color="#000">日记</NavItem>
+        <NavItem to="/login" icon="🔑" v-if="!userStore.getToken">登录/注册</NavItem>
+        <div v-else>
+            <n-dropdown :options="options" show-arrow :on-select="handleSelect">
+              <div class="flex items-center justify-center user-info">
+                <span class="nickname">{{ userInfo.nickname }}</span>
+                <div class="user-avatar">
+                  <img :src="userInfo.avatar || defaultAvatar" alt="用户头像">
+                </div>
+              </div>
+            </n-dropdown>
+        </div>
         <!-- <NavItem to="/portfolio" icon="🎨" @click="closeMobileMenu" color="#000">作品</NavItem> -->
         <!-- <NavItem to="/about" icon="👤" @click="closeMobileMenu" color="#000">关于</NavItem> -->
         <!-- <NavItem to="/contact" icon="✉️" @click="closeMobileMenu" color="#000">联系</NavItem> -->

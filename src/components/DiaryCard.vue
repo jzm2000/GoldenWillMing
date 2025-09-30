@@ -8,7 +8,7 @@
     <p class="diary-card-excerpt">{{ diary.content }}</p>
     <div class="diary-card-footer">
       <div class="diary-card-stats">
-        <span class="stat">
+        <span class="stat" @click.stop="likeDiaryHandle(diary)">
           <i :class="['iconfont',diary.isLiked ? 'icon-aixin1' : 'icon-aixin']"></i>
           {{ diary.likeNum }}
         </span>
@@ -37,6 +37,8 @@
 <script setup>
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { likeDiary } from "@/api/index.js";
+import { useUserStore } from "@/store/user.js";
 
 const props = defineProps({
   diary: {
@@ -53,7 +55,22 @@ const props = defineProps({
   }
 })
 
+const userStore = useUserStore();
 const router = useRouter()
+
+// 点赞日记
+function likeDiaryHandle(item){
+  likeDiary({
+    id:item.id,
+    userId:userStore.userInfo.id,
+    action:item.isLiked ? 'unlike' : 'like'
+  }).then(res=>{
+    if(res.code==200){
+      item.isLiked = item.isLiked ? 0 : 1;
+      item.likeNum = item.isLiked ? item.likeNum + 1 : item.likeNum - 1;
+    }
+  })
+};
 
 const navigateToDiary = () => {
   console.log('跳转日记详情');
@@ -87,7 +104,7 @@ const formatDate = (dateString) => {
   border-radius: 16px;
   padding: 1.5rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  cursor: pointer;
+  // cursor: pointer;
   transition: all 0.3s ease;
   border: 1px solid transparent;
   height: 100%;
@@ -155,6 +172,7 @@ const formatDate = (dateString) => {
   gap: 0.25rem;
   font-size: 0.875rem;
   color: var(--text-light);
+  cursor: pointer;
 }
 
 .diary-card-stats .iconfont {

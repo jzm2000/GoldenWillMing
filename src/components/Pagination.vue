@@ -75,10 +75,11 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['page-change'])
+const emit = defineEmits(['page-change','update:currentPage'])
 
 const goToPage = (page) => {
   if (page >= 1 && page <= props.totalPages) {
+    emit('update:currentPage', page)
     emit('page-change', page)
   }
 }
