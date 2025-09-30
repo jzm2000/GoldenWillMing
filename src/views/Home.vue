@@ -11,8 +11,7 @@
             </div>
           </div>
           <div class="hero-buttons">
-            <router-link to="/articles" class="btn btn-primary">浏览日记</router-link>
-            <router-link to="/about" class="btn btn-secondary">了解更多</router-link>
+            <router-link to="/articles" class="btn btn-primary">前往日记空间</router-link>
           </div>
         </div>
       </div>
@@ -106,7 +105,7 @@
 
 <script setup lang="jsx">
 import Navbar from '@/components/Navbar.vue'
-import { ref,reactive,onMounted,onUnmounted } from 'vue'
+import { ref,reactive,onMounted,onUnmounted,onBeforeMount } from 'vue'
 import { getUserInfo,getPublicDiaryList,likeDiary } from "@/api/index.js";
 import { useArticleStore } from '../store/article'
 import useCssVariables from '@/utils/useCssVariables';
@@ -190,15 +189,10 @@ const getUserInfoHandle = async () => {
 };
 
 // 函数执行
-getUserInfoHandle();
-initData();
-
-
-
-
-
-
-
+onBeforeMount(async ()=>{
+  await getUserInfoHandle();
+  initData();
+})
 
 
 
@@ -329,38 +323,96 @@ onUnmounted(()=>{
 
 /* Buttons */
 .btn {
-  display: inline-block;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-weight: 500;
-  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 2rem;
+  border-radius: 50px;
+  font-weight: 600;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   text-decoration: none;
   cursor: pointer;
   border: none;
   font-family: inherit;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  gap: 0.75rem;
 }
 
+/* 精致的主要按钮 */
 .btn-primary {
-  background-color: white;
-  color: var(--primary-color);
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  color: white;
+  box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  transform: translateY(0);
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: -1;
+  }
+  
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(67, 97, 238, 0.4);
+    
+    &::before {
+      opacity: 1;
+    }
+  }
+  
+  &:active {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+  }
 }
 
-.btn-primary:hover {
-  background-color: var(--bg-color);
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-}
-
+/* 次级按钮 */
 .btn-secondary {
   background-color: transparent;
   color: white;
   border: 2px solid white;
+  border-radius: 50px;
+  backdrop-filter: blur(4px);
+  
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(255, 255, 255, 0.15);
+  }
 }
 
-.btn-secondary:hover {
-  background-color: white;
+/* 为"Go to my diary space"按钮添加图标 */
+.hero-buttons .btn-primary::before {
+  /* 保留原有渐变效果 */
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+}
+/* Newsletter按钮特殊样式 */
+.newsletter-form .btn-primary {
+  background: rgba(255, 255, 255, 0.95);
   color: var(--primary-color);
-  transform: translateY(-2px);
+  backdrop-filter: blur(4px);
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3);
+  
+  &::before {
+    background: white;
+  }
+  
+  &:hover {
+    box-shadow: 0 8px 25px rgba(255, 255, 255, 0.4);
+  }
 }
 
 /* Section Styles */

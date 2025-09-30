@@ -40,7 +40,7 @@
       <!-- 登录表单 -->
       <form v-if="activeTab === 'login'" class="login-form" @submit.prevent="handleLogin">
         <div class="form-group">
-          <label for="login-username" class="form-label">用户名</label>
+          <label for="login-username" class="form-label required">用户名</label>
           <div class="input-wrapper">
             <span class="input-icon">👤</span>
             <input
@@ -56,7 +56,7 @@
         </div>
         
         <div class="form-group">
-          <label for="login-password" class="form-label">密码</label>
+          <label for="login-password" class="form-label required">密码</label>
           <div class="input-wrapper">
             <span class="input-icon">🔒</span>
             <input
@@ -86,21 +86,34 @@
       <!-- 注册表单 -->
       <form v-else class="register-form" @submit.prevent="handleRegister">
         <div class="form-group">
-          <label for="register-username" class="form-label">用户名</label>
+          <label for="register-username" class="form-label required">账户/用户名</label>
           <div class="input-wrapper">
             <span class="input-icon">👤</span>
             <input
               type="text"
               id="register-username"
               v-model="registerForm.account"
-              placeholder="请设置用户名"
+              placeholder="请设置账户/用户名"
               class="form-input"
               required
               autocomplete="username"
             />
           </div>
         </div>
-        
+        <div class="form-group">
+          <label for="register-nickname" class="form-label">昵称</label>
+          <div class="input-wrapper">
+            <span class="input-icon">👤</span>
+            <input
+              type="text"
+              id="register-nickname"
+              v-model="registerForm.nickname"
+              placeholder="请设置昵称"
+              class="form-input"
+              autocomplete="nickname"
+            />
+          </div>
+        </div>
         <div class="form-group">
           <label for="register-email" class="form-label">邮箱</label>
           <div class="input-wrapper">
@@ -111,13 +124,12 @@
               v-model="registerForm.email"
               placeholder="请输入邮箱"
               class="form-input"
-              required
             />
           </div>
         </div>
         
         <div class="form-group">
-          <label for="register-password" class="form-label">密码</label>
+          <label for="register-password" class="form-label required">密码</label>
           <div class="input-wrapper">
             <span class="input-icon">🔒</span>
             <input
@@ -141,7 +153,7 @@
         </div>
         
         <div class="form-group">
-          <label for="register-confirm-password" class="form-label">确认密码</label>
+          <label for="register-confirm-password" class="form-label required">确认密码</label>
           <div class="input-wrapper">
             <span class="input-icon">🔒</span>
             <input
@@ -198,7 +210,7 @@
 <script setup>
 import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
-import { login,getUserInfo } from "@/api/index.js";
+import { login,getUserInfo,register } from "@/api/index.js";
 import {useMessage} from "naive-ui";
 const message = useMessage();
 
@@ -222,6 +234,7 @@ const registerForm = reactive({
   account: '',
   email: '',
   password: '',
+  nickname:"",
   confirmPassword: '',
   agreeTerms: false
 });
@@ -242,12 +255,9 @@ const togglePasswordVisibility = (formType) => {
 
 // 处理登录
 const handleLogin = () => {
-  // 这里添加实际的登录逻辑
-  console.log('登录表单提交:', loginForm);
   login(loginForm).then(async res=>{
     if(res.code === 200){
       userStore.setToken(res.data);
-      // await getUserInfoHandle();
       setTimeout(()=>{
         message.success(res.msg);
       },500);
@@ -275,20 +285,25 @@ const handleRegister = () => {
     alert('两次输入的密码不一致！');
     return;
   }
-  
-  // 这里添加实际的注册逻辑
-  console.log('注册表单提交:', registerForm);
-  
-  // 模拟注册成功
-  setTimeout(() => {
-    alert('注册成功！请登录。');
-    activeTab.value = 'login';
-    // 清空注册表单
-    Object.keys(registerForm).forEach(key => {
-      registerForm[key] = '';
-    });
-    registerForm.agreeTerms = false;
-  }, 1000);
+  register({
+    account: registerForm.account,
+    email: registerForm.email,
+    nickname: registerForm.nickname,
+    password: registerForm.password,
+  }).then(res=>{
+    if(res.code === 200){
+      message.success(res.msg);
+      setTimeout(()=>{
+        activeTab.value = 'login';
+        registerForm.agreeTerms = false;
+        Object.keys(registerForm).forEach(key => {
+          registerForm[key] = '';
+        });
+      },100);
+    }else {
+      message.error(res.msg);
+    }
+  })
 };
 </script>
 
@@ -454,6 +469,11 @@ const handleRegister = () => {
     margin-bottom: 0.5rem;
     font-weight: 500;
     color: var(--text-color);
+    &.required::after {
+      content: '*';
+      color: var(--primary-color);
+      margin-left: 0.25rem;
+    }
   }
   
   .input-wrapper {

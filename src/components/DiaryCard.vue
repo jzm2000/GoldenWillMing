@@ -60,8 +60,9 @@ const navigateToDiary = () => {
 }
 
 const getCategoryName = () => {
-  const category = props.categories.find(cat => cat.id === props.diary.categoryId)
-  return category ? category.name : '未知'
+  const category = props.categories.find(cat => cat.id === props.diary.category_id);
+  console.log(props.diary);
+  return category ? category.title : '未知'
 }
 
 const getTagName = (tagId) => {

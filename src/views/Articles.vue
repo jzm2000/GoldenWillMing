@@ -106,7 +106,7 @@
             <div v-if="filteredDiaries.length === 0" class="empty-state">
               <div class="empty-icon">📝</div>
               <h3>暂无符合条件的日记</h3>
-              <p>尝试调整筛选条件或创建新日记</p>
+              <p class="flex justify-center items-center" style="column-gap:0.5rem;">尝试调整筛选条件或<button class="create-diary-btn small" @click="writeNewDiary">创建新的日记</button></p>
               <button class="create-diary-btn small" @click="resetFilters">
                 重置筛选
               </button>
@@ -318,8 +318,11 @@ const resetFilters = () => {
 }
 
 const getCategoryName = (categoryId) => {
+  if(categoryId==''){
+    return '全部'
+  };
   const category = categories.value.find(cat => cat.id === categoryId)
-  return category ? category.name : '未知'
+  return category ? category.title : '未知'
 }
 // 事件执行
 getCategoryList();
@@ -327,7 +330,7 @@ getCategoryList();
 
 
 const writeNewDiary = () => {
-  router.push({ name: 'WriteDiary',query:{ isEdit:false } })
+  router.push({ name: 'WriteDiary',query:{ isEdit:false,categoryId:activeCategory.value } })
 }
 
 onMounted(() => {
@@ -706,7 +709,7 @@ onMounted(() => {
 
 .empty-state h3 {
   font-size: 1.3rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1rem;
   color: var(--text-dark);
 }
 

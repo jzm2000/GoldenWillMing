@@ -93,13 +93,9 @@
               <!-- 分类选择 -->
               <div class="setting-item">
                 <label>分类</label>
-                <select v-model="diaryForm.category" class="setting-select">
+                <select v-model="diaryForm.categoryId" class="setting-select">
                   <option value="">选择分类</option>
-                  <option value="1">日常生活</option>
-                  <option value="2">学习笔记</option>
-                  <option value="3">工作记录</option>
-                  <option value="4">旅行见闻</option>
-                  <option value="5">心情感悟</option>
+                  <option :value="item.id" v-for="item in categories" :key="item.id">{{ item.title }}</option>
                 </select>
               </div>
             </div>
@@ -174,14 +170,14 @@
                   <input 
                     type="radio" 
                     name="privacy" 
-                    value="public" 
+                    value="1" 
                     v-model="diaryForm.privacy"
                   />
                   <span class="privacy-label">
                     <i class="iconfont icon-gongkai"></i> 公开
                   </span>
                 </label>
-                <label class="privacy-option">
+                <!-- <label class="privacy-option">
                   <input 
                     type="radio" 
                     name="privacy" 
@@ -191,12 +187,12 @@
                   <span class="privacy-label">
                     <i class="iconfont icon-haoyou"></i> 仅好友可见
                   </span>
-                </label>
+                </label> -->
                 <label class="privacy-option">
                   <input 
                     type="radio" 
                     name="privacy" 
-                    value="private" 
+                    value="0" 
                     v-model="diaryForm.privacy"
                   />
                   <span class="privacy-label">
@@ -222,19 +218,22 @@
 import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useArticleStore } from '../store/article.js'
+import { useUserStore } from "@/store/user.js"
+import { addDiary,categoryList } from "@/api/index.js"
 
 const router = useRouter()
 const articleStore = useArticleStore()
+const userStore = useUserStore();
 
 // 日记表单数据
 const diaryForm = reactive({
   title: '',
   content: '',
-  excerpt: '',
+  // excerpt: '',
   date: new Date().toISOString().split('T')[0],
-  category: '',
+  categoryId: '',
   tags: [],
-  privacy: 'public',
+  privacy: '0',
   images: []
 })
 
@@ -261,6 +260,7 @@ const weathers = [
   { id: 'night', name: '夜晚', icon: '🌙' }
 ]
 
+let categories = ref([]);
 // 选中的情绪和天气
 const selectedEmotions = ref([])
 const selectedWeather = ref('')
@@ -270,6 +270,16 @@ const uploadedImages = ref([])
 // 提示信息
 const showSuccess = ref(false)
 const successMessage = ref('')
+
+// 获取分类列表
+const getCategoryList = async() =>{
+  let res = await categoryList();
+    if(res.code==200){
+      categories.value = res.data;
+    }else{
+      categories.value = [];
+    }
+}
 
 // 更新摘要
 function updateExcerpt() {
@@ -308,6 +318,7 @@ function removeTag(index) {
 
 // 处理图片上传
 function handleImageUpload(event) {
+  return showSuccessMessage('暂不支持添加图片');
   const files = event.target.files
   if (files) {
     Array.from(files).forEach(file => {
@@ -344,43 +355,41 @@ function saveDraft() {
 
 // 发布日记
 function publishDiary() {
+  if (!userStore.userInfo?.id) {
+    showSuccessMessage('请先登录')
+    return
+  };
   if (!diaryForm.title) {
     showSuccessMessage('请输入日记标题')
     return
-  }
-  
+  };
   if (!diaryForm.content) {
     showSuccessMessage('请输入日记内容')
     return
-  }
-  
+  };
+  if (!diaryForm.categoryId) {
+    showSuccessMessage('请选择分类')
+    return
+  };
+
   // 创建新日记对象
-  const newDiary = {
-    id: articleStore.articles.length + 1,
+  let params = {
     title: diaryForm.title,
     content: diaryForm.content,
-    excerpt: diaryForm.excerpt || diaryForm.content.substring(0, 100) + '...',
-    date: diaryForm.date,
-    category: diaryForm.category,
-    tags: diaryForm.tags,
+    categoryId: diaryForm.categoryId,
     privacy: diaryForm.privacy,
-    images: diaryForm.images,
-    emotions: selectedEmotions.value,
-    weather: selectedWeather.value,
-    likes: 0,
-    comments: 0,
-    views: 0
-  }
-  
-  // 在实际项目中，这里会调用API发布日记
-  articleStore.articles.unshift(newDiary)
-  
-  showSuccessMessage('日记发布成功！')
-  
-  // 3秒后跳转到日记列表页
-  setTimeout(() => {
-    router.push('/articles')
-  }, 1500)
+    userId:userStore.userInfo?.id,
+  };
+  addDiary(params).then(res=>{
+    if(res.code==200){
+      showSuccessMessage('日记发布成功！');
+      setTimeout(() => {
+        router.push('/articles')
+      }, 1500)
+    }else {
+      showSuccessMessage(res.msg);
+    }
+  });
 }
 
 // 显示成功消息
@@ -390,7 +399,10 @@ function showSuccessMessage(message) {
   setTimeout(() => {
     showSuccess.value = false
   }, 2000)
-}
+};
+
+// 事件执行
+getCategoryList();
 </script>
 
 <style lang="scss" scoped>
@@ -552,7 +564,7 @@ function showSuccessMessage(message) {
 }
 
 .diary-content-input::placeholder {
-  color: var(--text-light);
+  color:#999;
 }
 
 // 图片上传样式

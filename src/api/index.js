@@ -3,6 +3,8 @@ import { post, postJson, postForm, get } from './request.js';
 //#region 用户模块
 // 登录
 export const login = (params) => post("/users/login",params);
+// 注册
+export const register = (params) => post("/users/register",params);
 // 获取用户信息
 export const getUserInfo = () => post("/users/info");
 
