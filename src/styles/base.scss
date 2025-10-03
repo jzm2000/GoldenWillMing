@@ -19,9 +19,9 @@ button.small-btn{
 }
 @font-face {
   font-family: "iconfont"; /* Project id 5023305 */
-  src: url('//at.alicdn.com/t/c/font_5023305_zt222hjybg.woff2?t=1759214111162') format('woff2'),
-       url('//at.alicdn.com/t/c/font_5023305_zt222hjybg.woff?t=1759214111162') format('woff'),
-       url('//at.alicdn.com/t/c/font_5023305_zt222hjybg.ttf?t=1759214111162') format('truetype');
+  src: url('//at.alicdn.com/t/c/font_5023305_gq0trvu6liu.woff2?t=1759311187689') format('woff2'),
+       url('//at.alicdn.com/t/c/font_5023305_gq0trvu6liu.woff?t=1759311187689') format('woff'),
+       url('//at.alicdn.com/t/c/font_5023305_gq0trvu6liu.ttf?t=1759311187689') format('truetype');
 }
 
 .iconfont {
@@ -30,6 +30,10 @@ button.small-btn{
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-bianji:before {
+  content: "\e606";
 }
 
 .icon-shezhi:before {

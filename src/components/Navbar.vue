@@ -74,13 +74,6 @@ import defaultAvatar from '@/assets/img/avatar.jpeg'
 const userStore = useUserStore();
 const { userInfo } = storeToRefs(userStore);
 
-const props = defineProps({
-   color:{
-    type:String,
-    default:'#000'
-   }
-})
-
 const NavItem = (prop, { slots }) => {
   const baseClasses = 'nav-item flex items-center gap-1.5 px-3 py-2 rounded-lg transition-all duration-300'
   const activeClass = 'bg-primary/10 text-primary font-medium'
@@ -108,7 +101,7 @@ const NavItem = (prop, { slots }) => {
           h('span', {
             class: 'nav-item-icon',
           }, prop.icon),
-          h('span', { class:'nav-item_text',style:{color:prop.color} }, slots.default?.()) 
+          h('span', { class:'nav-item_text' }, slots.default?.()) 
         ])
       ])
     }
@@ -173,7 +166,9 @@ onUnmounted(() => {
 
 <style scoped lang="scss">
 :deep(.nav-item_text) {
-  color:v-bind('props.color')
+  background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+  color: transparent;
+  background-clip: text;
 }
 .navbar {
   padding: 1.25rem 0;
@@ -194,12 +189,6 @@ onUnmounted(() => {
   background-color: rgba(255, 255, 255, 0.68);
   backdrop-filter: blur(10px);
   animation: slideDown 0.3s ease;
-  :deep(.nav-item_text){
-    color: #000;
-  }
-  .nickname{
-    color: #000;
-  }
 }
 
 @keyframes slideDown {
@@ -372,7 +361,9 @@ onUnmounted(() => {
   justify-content: center;
 }
 .user-info{
-   color: v-bind('props.color');
+   background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+   color:transparent;
+   background-clip: text;
    cursor: pointer;
   .user-avatar{
     width: 36px;

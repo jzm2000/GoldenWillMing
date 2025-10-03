@@ -8,17 +8,22 @@
     <p class="diary-card-excerpt">{{ diary.content }}</p>
     <div class="diary-card-footer">
       <div class="diary-card-stats">
-        <span class="stat" @click.stop="likeDiaryHandle(diary)">
-          <i :class="['iconfont',diary.isLiked ? 'icon-aixin1' : 'icon-aixin']"></i>
-          {{ diary.likeNum }}
-        </span>
-        <span class="stat">
-          <span class="iconfont icon-pinglun"></span>
-          {{ diary.comments || 0 }}
-        </span>
-        <span class="stat">
-          <span class="iconfont icon-yanjing_xianshi_o" style="font-size:1.6rem"></span>
-          {{ diary.views || 0 }}
+        <div class="stat-group">
+          <span class="stat" @click.stop="likeDiaryHandle(diary)">
+            <i :class="['iconfont',diary.isLiked ? 'icon-aixin1' : 'icon-aixin']"></i>
+            {{ diary.likeNum }}
+          </span>
+          <span class="stat">
+            <span class="iconfont icon-pinglun"></span>
+            {{ diary.comments || 0 }}
+          </span>
+          <span class="stat">
+            <span class="iconfont icon-yanjing_xianshi_o" style="font-size:1.6rem"></span>
+            {{ diary.views || 0 }}
+          </span>
+        </div>
+        <span class="stat" @click="openEditDiary(diary)">
+          <span class="iconfont icon-bianji"></span>
         </span>
       </div>
       <div class="diary-card-tags">
@@ -39,7 +44,7 @@ import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { likeDiary } from "@/api/index.js";
 import { useUserStore } from "@/store/user.js";
-
+import { useDiaryStore } from "@/store/diary.js";
 const props = defineProps({
   diary: {
     type: Object,
@@ -56,6 +61,7 @@ const props = defineProps({
 })
 
 const userStore = useUserStore();
+const diaryStore = useDiaryStore();
 const router = useRouter()
 
 // 点赞日记
@@ -74,6 +80,17 @@ function likeDiaryHandle(item){
 
 const navigateToDiary = () => {
   console.log('跳转日记详情');
+}
+
+const openEditDiary = (diary) => {
+  router.push({
+    path: '/write-diary',
+    query: {
+      id: diary.id,
+      isEdit:true
+    }
+  });
+  diaryStore.setDiaryInfo(diary);
 }
 
 const getCategoryName = () => {
@@ -162,10 +179,13 @@ const formatDate = (dateString) => {
 
 .diary-card-stats {
   display: flex;
-  gap: 1.2rem;
-  margin-bottom: 0.75rem;
+  justify-content: space-between;
+  align-items: center;
 }
-
+.stat-group{
+  display: flex;
+  gap: 1.2rem;
+}
 .diary-card-stats .stat {
   display: flex;
   align-items: center;

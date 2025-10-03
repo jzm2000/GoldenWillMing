@@ -7,7 +7,7 @@ const route = useRoute();
 </script>
 
 <template>
-    <Navbar v-if="route.name != 'Home'"/>
+    <Navbar/>
     <main class="main-content">
       <router-view />
     </main>

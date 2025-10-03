@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <section class="hero">
-      <Navbar v-if="route.name == 'Home'" :color="primaryColor"/>
+      <!-- <Navbar v-if="route.name == 'Home'" :color="primaryColor"/> -->
       <div class="container">
         <div class="hero-content">
           <div class="flex_box">
@@ -80,6 +80,14 @@
                    
                 </div>
               </div>
+              <div class="not_diary" v-if="diaryList.length===0">
+                <div class="empty-icon">
+                  📓
+                </div>
+                <div class="empty-title">暂无日记</div>
+                <div class="empty-subtitle">还没有任何日记内容，来写第一篇吧！</div>
+                <button class="empty-button" @click="toWriteDiary">去写日记</button>
+              </div>
             </div>
           </div>
         </div>
@@ -118,11 +126,12 @@ const userStore = useUserStore();
 
 const {getVariable} = useCssVariables();
 
-import {useRoute} from 'vue-router';
+import {useRoute,useRouter} from 'vue-router';
 const articleStore = useArticleStore();
 const route = useRoute();
+const router = useRouter();
 let heroText = ref(null);
-let textList = ['天不生我金志明，人间万古如长夜。','日记里藏着时光的秘密。','日记是心灵的镜像，映照出最真实的自己。','日记是成长的刻度，标记着每一步蜕变。'];
+let textList = ['日记里藏着时光的秘密。','日记是心灵的镜像，映照出最真实的自己。','日记是成长的刻度，标记着每一步蜕变。'];
 let textIndex = 0;
 let interval = null;
 let timeout = null;
@@ -173,6 +182,11 @@ function commentDiary(id){
 function viewDiary(id){
 
 };
+function toWriteDiary(){
+  router.push({
+    path:"write-diary",
+  })
+}
 
 // 获取用户信息
 const getUserInfoHandle = async () => {
@@ -831,6 +845,75 @@ onUnmounted(()=>{
 .diary-item-view:hover {
   background-color: var(--bg-color);
   transform: scale(1.1);
+}
+
+.not_diary{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  color: var(--text-medium);
+  background-color:var(--card-bg);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  height: 260px;
+  padding: 2rem;
+  text-align: center;
+  
+  &:hover{
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.1);
+  }
+  
+  .empty-icon {
+    font-size: 2rem;
+    color: var(--primary-light);
+    margin-bottom: 1rem;
+    opacity: 0.6;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      transform: scale(1.1) rotate(5deg);
+      opacity: 0.8;
+    }
+  }
+  
+  .empty-title {
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 0.5rem;
+  }
+  
+  .empty-subtitle {
+    font-size: var(--font-size-base);
+    color: var(--text-light);
+    margin-bottom: 1.5rem;
+    max-width: 200px;
+  }
+  
+  .empty-button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 1.5rem;
+    font-size: var(--font-size-base);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      background-color: var(--primary-light);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(158, 31, 54, 0.2);
+    }
+    
+    &:active {
+      transform: translateY(0);
+    }
+  }
 }
 
 @media (max-width: 768px) {
