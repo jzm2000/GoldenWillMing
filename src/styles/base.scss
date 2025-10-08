@@ -17,6 +17,40 @@ button.small-btn{
   border: none;
   cursor: pointer;
 }
+.ripple{
+    position: fixed;
+    border-radius: 50%;
+    animation: ripple 1s ease;
+    pointer-events: none;
+}
+
+@keyframes ripple {
+    from {
+        transform: scale(0);
+        opacity: 1;
+    }
+    to {
+        transform: scale(1);
+        opacity: 0;
+    }
+}
+.wave{
+  position: fixed;
+  z-index: 999;
+  border-radius: 50%;
+  animation: wave 0.3s linear;
+  opacity: 0;
+}
+@keyframes wave {
+  0%{
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  100%{
+    transform: scale(1);
+    opacity: 0;
+  }
+}
 @font-face {
   font-family: "iconfont"; /* Project id 5023305 */
   src: url('//at.alicdn.com/t/c/font_5023305_gq0trvu6liu.woff2?t=1759311187689') format('woff2'),

@@ -7,7 +7,7 @@
             <div class="setting-icon">
                 <i class="iconfont icon-shezhi"></i>
             </div>
-            <ul class="setting-form">
+            <ul class="setting-form" ref="settingFormRef">
                 <li v-for="item in themeOptions" :key="item.value" class="setting-theme-item">
                     <input :id="`theme-${item.value}`" type="radio" :value="item.value" v-model="settingForm.theme" @change="applyTheme">
                     <label :for="`theme-${item.value}`">{{item.label}}</label>
@@ -17,16 +17,19 @@
     </div>
 </template>
 <script setup>
-import { ref,onMounted,reactive } from "vue";
+import { ref,onMounted,reactive,watch,nextTick } from "vue";
 import { themeConfig } from "@/setting.js";
+import { getRadius } from "@/utils/tool.js";
 let isTop = ref(false);
 const settingForm = reactive({
     theme: 'default'
 });
 const showSettingForm = ref(true);
+
 let htmlStyle = null;
 let root = null;
 let rootCss = ref({});
+const settingFormRef = ref([]);
 
 const themeOptions = [
     {
@@ -38,7 +41,7 @@ const themeOptions = [
         label: '粉紫色'
     }
 ];
-
+let startColor = themeOptions[0].value;
 function goTop(){
     window.scrollTo({
         top: 0,
@@ -51,8 +54,7 @@ function applyTheme(e){
     Object.entries(rootCss.value).forEach(([key, value]) => {
         root.style.setProperty(key, value);
     });
-}
-
+};
 onMounted(()=>{
     root = document.documentElement;
     htmlStyle = getComputedStyle(root);
@@ -75,7 +77,24 @@ onMounted(()=>{
             isTop.value = false;
         }
     });
-})
+    
+    settingFormRef.value.addEventListener("click",function (e) {
+        // 切换颜色
+        let { radius, x, y } = getRadius(e);
+        let div = document.createElement("div");
+        div.classList.add("ripple");
+        div.style.pointerEvents = "none";
+        div.style.background = 'linear-gradient(45deg, var(--primary-color), var(--primary-light))';
+        div.style.left = `${x - radius}px`;
+        div.style.top = `${y - radius}px`;
+        div.style.width = `${radius * 2}px`;
+        div.style.height = `${radius * 2}px`;
+        document.body.appendChild(div);
+        setTimeout(() => {
+          div.remove();
+        }, 900);
+      });
+});
 </script>
 <style lang="scss" scoped>
 .setting{
@@ -150,6 +169,7 @@ form{
     padding: 0.5rem;
     display: none;
     box-shadow: var(--box-shadow);
+    user-select: none;
     &::after{
         content: "";
         position: absolute;
@@ -183,6 +203,24 @@ form{
     }
     &:hover{
         transform: scale(1.05);
+    }
+}
+.ripple{
+    position: fixed;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.5);
+    animation: ripple 1s ease;
+    pointer-events: none;
+}
+
+@keyframes ripple {
+    from {
+        transform: scale(0);
+        opacity: 1;
+    }
+    to {
+        transform: scale(1);
+        opacity: 0;
     }
 }
 @keyframes rotate {

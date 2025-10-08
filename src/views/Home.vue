@@ -41,6 +41,9 @@
                 </li> 
               </ul>
             </div>
+            <div class="search-box">
+              <GInput placeholder="搜索日记" v-model="searchQuery" />
+            </div>
           </div>
           <div class="right-diary_list">
             <div class="diary-title">精选日记</div>
@@ -120,6 +123,7 @@ import useCssVariables from '@/utils/useCssVariables';
 import avatar from "@/assets/img/1.jpg";
 import { useUserStore } from '@/store/user.js';
 import { useMessage } from "naive-ui";
+import GInput from '@/components/GoldUI/g-input/input.vue'
 const message = useMessage();
 
 const userStore = useUserStore();
@@ -136,7 +140,12 @@ let textIndex = 0;
 let interval = null;
 let timeout = null;
 let primaryColor = getVariable('--secondary-color');
-const latestArticles = ref(articleStore.getLatestArticles(3));
+let searchQuery = ref('');
+let queryParams = {
+  pageSize:10,
+  pageNum:1
+};
+
 const hoveredArticle = ref(null)
 const diaryList = ref([]);
 const userInfo = reactive({
@@ -152,7 +161,9 @@ const userInfo = reactive({
 // 公开日记列表初始化
 function initData(){
   getPublicDiaryList({
-    userId:userStore.userInfo.id
+    userId:userStore.userInfo.id,
+    ...queryParams,
+    title:searchQuery.value,
   }).then(res=>{
     if(res.code === 200){
       diaryList.value = res.data.rows || [];
@@ -166,6 +177,7 @@ function likeDiaryHandle(item){
   likeDiary({
     id:item.id,
     userId:userStore.userInfo.id,
+    authorId:item.author_id,
     action:item.isLiked ? 'unlike' : 'like'
   }).then(res=>{
     if(res.code==200){
@@ -547,6 +559,12 @@ onUnmounted(()=>{
   .right-diary_list{
     flex: 1;
   }
+}
+.search-box{
+  background-color: #fff;
+  border-radius: 1rem;
+  padding: 0.5rem 1rem;
+  margin-top: 1rem;
 }
 .view-all-link {
   color: var(--primary-color);

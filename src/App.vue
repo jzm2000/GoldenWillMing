@@ -1,6 +1,24 @@
 <script setup>
 import {useRoute} from 'vue-router';
 const route = useRoute();
+
+window.addEventListener("click", function (e) {
+  let r = 50;
+  let x = e.clientX;
+  let y = e.clientY;
+  let div = document.createElement("div");
+  div.classList.add("wave");
+  div.style.pointerEvents = "none";
+  div.style.background = 'linear-gradient(45deg, var(--primary-color), var(--primary-light))';
+  div.style.left = `${x - r}px`;
+  div.style.top = `${y - r}px`;
+  div.style.width = `${r * 2}px`;
+  div.style.height = `${r * 2}px`;
+  document.body.appendChild(div);
+  setTimeout(() => {
+    div.remove();
+  }, 500);
+});
 </script>
 
 <template>
@@ -26,4 +44,5 @@ const route = useRoute();
 .navbar-sticky ~ .main-content {
   padding-top: 80px;
 }
+
 </style>
