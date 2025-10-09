@@ -203,7 +203,9 @@ function toWriteDiary(){
     path:"write-diary",
   })
 }
-
+const handleDatePickerFocus = (e,date) => {
+  console.log(date)
+};
 // 获取用户信息
 const getUserInfoHandle = async () => {
   let res = await getUserInfo();
