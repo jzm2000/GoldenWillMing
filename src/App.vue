@@ -1,6 +1,11 @@
 <script setup>
+import { zhCN, dateZhCN } from 'naive-ui'
 import {useRoute} from 'vue-router';
 const route = useRoute();
+const zhCNConfig = {
+  ...zhCN,
+  date: dateZhCN
+}
 
 window.addEventListener("click", function (e) {
   let r = 50;
@@ -22,9 +27,11 @@ window.addEventListener("click", function (e) {
 </script>
 
 <template>
-  <n-message-provider>
-    <router-view></router-view>
-  </n-message-provider>
+  <n-config-provider :locale="zhCNConfig" :date-locale="zhCNConfig.date">
+    <n-message-provider>
+      <router-view></router-view>
+    </n-message-provider>
+  </n-config-provider>
 </template>
 
 <style scoped>

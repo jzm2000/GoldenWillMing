@@ -1,5 +1,5 @@
 <template>
-  <nav class="navbar" :class="{ 'sticky': isSticky }">
+  <nav class="navbar">
     <div class="container">
       <router-link to="/" class="logo">
         <span class="logo-icon">🌟</span>
@@ -171,7 +171,8 @@ onUnmounted(() => {
   background-clip: text;
 }
 .navbar {
-  padding: 1.25rem 0;
+  // padding: 1.25rem 0;
+  height: 60px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
   position: relative;
@@ -184,7 +185,8 @@ onUnmounted(() => {
   top: 0;
   left: 0;
   right: 0;
-  padding: 0.75rem 0;
+  // padding: 0.75rem 0;
+  height:60px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   background-color: rgba(255, 255, 255, 0.68);
   backdrop-filter: blur(10px);
@@ -208,6 +210,7 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  height: 100%;
 }
 
 /* Logo 样式 */

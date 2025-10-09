@@ -44,6 +44,9 @@
             <div class="search-box">
               <GInput placeholder="搜索日记" v-model="searchQuery" />
             </div>
+            <div class="date-picker">
+              <n-date-picker panel type="date" @update:value="handleDatePickerFocus" />
+            </div>
           </div>
           <div class="right-diary_list">
             <div class="diary-title">精选日记</div>
@@ -145,7 +148,8 @@ let queryParams = {
   pageSize:10,
   pageNum:1
 };
-
+let selectedDate = ref('');
+let scrollTop = ref(0);
 const hoveredArticle = ref(null)
 const diaryList = ref([]);
 const userInfo = reactive({
@@ -272,14 +276,14 @@ const simulateTyping = (text, element,status = 1,delay = 100) => {
       index++;
     }
   }, delay);
-}; 
+};
 onMounted(()=>{
   simulateTyping(textList[textIndex], heroText.value)
 });
 onUnmounted(()=>{
   clearInterval(interval);
   clearTimeout(timeout);
-})
+  })
 </script>
 
 <style scoped lang="scss">
@@ -461,7 +465,7 @@ onUnmounted(()=>{
     width: 300px;
     .user-info {
       background-color: var(--card-bg);
-      border-radius: 16px;
+      border-radius: 0.75rem;
       padding: 2rem;
       box-shadow: var(--shadow);
       transition: all 0.3s ease;
@@ -562,7 +566,7 @@ onUnmounted(()=>{
 }
 .search-box{
   background-color: #fff;
-  border-radius: 1rem;
+  border-radius: 0.75rem;
   padding: 0.5rem 1rem;
   margin-top: 1rem;
   transition: all 0.3s ease;
@@ -700,7 +704,7 @@ onUnmounted(()=>{
 }
 .hero-text-box{
   margin: 20px auto;
-  padding: 16px;
+  padding: 0.75rem;
   background: rgba(51, 47, 43, 0.4);
   justify-content: center;
   border-radius: 8px;
@@ -759,7 +763,7 @@ onUnmounted(()=>{
 
 .diary-item {
   background-color: var(--card-bg);
-  border-radius: 16px;
+  border-radius: 0.75rem;
   padding: 2rem;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
@@ -877,7 +881,7 @@ onUnmounted(()=>{
   flex-direction: column;
   color: var(--text-medium);
   background-color:var(--card-bg);
-  border-radius: 16px;
+  border-radius: 0.75rem;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
   border: 1px solid rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
@@ -937,6 +941,14 @@ onUnmounted(()=>{
       transform: translateY(0);
     }
   }
+}
+.date-picker{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1rem;
+  background-color: #fff;
+  border-radius: 0.75rem;
 }
 
 @media (max-width: 768px) {
