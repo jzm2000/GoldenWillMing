@@ -133,8 +133,8 @@
         <div class="activities-list">
           <div v-for="activity in recentActivities" :key="activity.id" class="activity-item">
             <span class="activity-icon">{{ activity.icon }}</span>
-            <span class="activity-text">{{ activity.text }}</span>
-            <span class="activity-time">{{ activity.time }}</span>
+            <span class="activity-text">{{ activity.message }}</span>
+            <span class="activity-time">{{ activity.updated_at }}</span>
           </div>
         </div>
       </div>
@@ -147,7 +147,7 @@ import { ref, onMounted, reactive,computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useArticleStore } from '@/store/article'
 
-import { getDiaryList,categoryList } from "@/api/index.js"
+import { getDiaryList,categoryList,getRecentNews } from "@/api/index.js"
 
 import DiaryCard from '@/components/DiaryCard.vue'
 import CategoryList from '@/components/CategoryList.vue'
@@ -189,13 +189,9 @@ const tags = ref([
   { id: 8, name: '反思' }
 ])
 
-const diaries = ref([])
+const diaries = ref([]);
 
-const recentActivities = ref([
-  { id: 1, icon: '❤️', text: '张三点赞了你的日记', time: '1小时前' },
-  { id: 2, icon: '💬', text: '李四评论了你的日记', time: '3小时前' },
-  { id: 3, icon: '📝', text: '你创建了新日记《春日午后的咖啡时光》', time: '昨天' }
-])
+const recentActivities = ref([]);
 
 // 计算属性
 
@@ -283,7 +279,26 @@ const getCategoryList = async() =>{
       categories.value = [];
     }
 }
-
+// 获取最新消息
+const getRecentNewsList = async() =>{
+  let res = await getRecentNews({
+    pageNum:1,
+    pageSize:10
+  });
+    if(res.code==200){
+      recentActivities.value = res.data.rows;
+      recentActivities.value.forEach(item=>{
+        item.updated_at = formatDate(item.updated_at);
+        if(item.type === 'like'){
+          item.icon = '❤️';
+        } else if(item.type === 'comment'){
+          item.icon = '💬';
+        }
+      })
+    }else{
+      recentActivities.value = [];
+    }
+};
 const onTagToggle = (tagId) => {
   const index = selectedTags.value.indexOf(tagId)
   if (index > -1) {
@@ -321,13 +336,23 @@ const getCategoryName = (categoryId) => {
 }
 // 事件执行
 getCategoryList();
-
+getRecentNewsList();
 
 
 const writeNewDiary = () => {
   router.push({ name: 'WriteDiary',query:{ isEdit:false,categoryId:activeCategory.value } })
 }
 
+const formatDate = (dateString) => {
+  const date = new Date(dateString)
+  return date.toLocaleDateString('zh-CN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
 onMounted(() => {
   articleStore.loadArticles()
 })

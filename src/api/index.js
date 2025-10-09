@@ -10,7 +10,6 @@ export const getUserInfo = () => post("/users/info");
 
 //#endregion 用户模块
 
-// 日记模块
 //#region日记模块
 // 日记新增
 export const addDiary = (params) => post("/diary/add",params);
@@ -24,5 +23,9 @@ export const getPublicDiaryList = (params) => get("/public/diary/list",params);
 export const likeDiary = (params) => post("/diary/like",params);
 // 日记分类
 export const categoryList = (params) => get("/diary-category/categoryList",params);
-
 //#endregion 日记模块
+
+//#region 最新消息模块
+export const getRecentNews = (params) => get("/recent-news/list",params);
+
+//#endregion 最新消息模块

@@ -69,6 +69,7 @@ function likeDiaryHandle(item){
   likeDiary({
     id:item.id,
     userId:userStore.userInfo.id,
+    authorId:item.author_id,
     action:item.isLiked ? 'unlike' : 'like'
   }).then(res=>{
     if(res.code==200){

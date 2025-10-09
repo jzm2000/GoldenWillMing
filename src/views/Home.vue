@@ -110,7 +110,7 @@
       </section>
     </div>
 
-    <img src="@/assets/img/banner2.png" alt="" class="mainBanner">
+    <img src="@/assets/img/banner4.png" alt="" class="mainBanner">
   </div>
 </template>
 
@@ -565,6 +565,11 @@ onUnmounted(()=>{
   border-radius: 1rem;
   padding: 0.5rem 1rem;
   margin-top: 1rem;
+  transition: all 0.3s ease;
+  &:hover{
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-hover);
+  }
 }
 .view-all-link {
   color: var(--primary-color);
