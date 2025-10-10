@@ -192,7 +192,12 @@ function likeDiaryHandle(item){
 };
 // 评论日记
 function commentDiary(id){
-  message.warning("评论功能正在开发中。。。")
+  router.push({
+    name:"ArticleDetail",
+    params:{
+      id:id
+    }
+  });
 };
 // 查看日记
 function viewDiary(id){

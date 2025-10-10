@@ -177,6 +177,9 @@ onUnmounted(() => {
   transition: all 0.3s ease;
   position: relative;
   z-index: 100;
+  &:hover{
+    background-color: rgba(0, 0, 0, 0.68);
+  }
 }
 
 /* 粘性导航栏样式 */

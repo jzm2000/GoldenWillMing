@@ -163,10 +163,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, onBeforeMount } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useUserStore } from '@/store/user.js';
 import { useDiaryStore } from '@/store/diary.js';
+import { getDiaryById } from '@/api/index.js';
 
 const router = useRouter();
 const route = useRoute();
@@ -176,8 +177,9 @@ const diaryStore = useDiaryStore();
 // 引用
 const commentTextarea = ref(null);
 
-// 状态
+// 日记详情
 const diary = ref({
+  id:"",
   title: '',
   authorName: '',
   authorAvatar: '',
@@ -197,7 +199,8 @@ const relatedArticles = ref([]);
 const defaultAvatar = './img/banner2.png';
 
 // 获取日记ID
-const diaryId = computed(() => route.params.id);
+diary.id = route.params.id;
+
 
 // 格式化日期
 const formatDate = (dateString) => {
@@ -294,9 +297,12 @@ const goBack = () => {
 };
 
 // 模拟加载数据
-const loadDiaryData = () => {
-  // 在实际项目中，这里应该通过API获取日记数据
-  // 这里使用模拟数据
+const loadDiaryData = async () => {
+   let res = await getDiaryById({id:diary.id});
+  if(res.code === 200){
+    // diary.value = res.data;
+    console.log(res);
+  }
   
   diary.value = {
     title: '春日游记：寻找城市里的小确幸',
@@ -363,6 +369,9 @@ const loadDiaryData = () => {
   ];
 };
 
+onBeforeMount(()=>{
+
+});
 // 组件挂载时加载数据
 onMounted(() => {
   loadDiaryData();
