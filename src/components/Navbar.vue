@@ -69,6 +69,7 @@ import { useUserStore } from "@/store/user.js";
 import { User, Edit, SwitchButton } from '@element-plus/icons-vue';
 import { NIcon } from 'naive-ui';
 import { storeToRefs } from "pinia";
+import { logout } from "@/api/index.js";
 import defaultAvatar from '@/assets/img/avatar.jpeg'
 
 const userStore = useUserStore();
@@ -150,7 +151,12 @@ const closeMobileMenu = () => {
 }
 const handleSelect = (key) =>{
   if(key === 'logout'){
-    userStore.logout();
+    logout().then(res=>{
+      if(res.code==200){
+        userStore.logout();
+      };
+    })
+    
   }
 }
 // 生命周期钩子

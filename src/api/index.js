@@ -7,7 +7,8 @@ export const login = (params) => post("/users/login",params);
 export const register = (params) => post("/users/register",params);
 // 获取用户信息
 export const getUserInfo = () => post("/users/info");
-
+// 退出登录
+export const logout = () => post("/users/logout");
 //#endregion 用户模块
 
 //#region日记模块
