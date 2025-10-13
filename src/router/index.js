@@ -33,6 +33,16 @@ const routes = [
         name: "WriteDiary",
         component: () => import("@/views/WriteDiary.vue"),
       },
+      {
+        path: "/profile",
+        name: "Profile",
+        component: () => import("@/views/Profile/Profile.vue"),
+      },
+      {
+        path: '/profile-edit',
+        name: "ProfileEdit",
+        component: () => import("@/views/Profile/ProfileEdit.vue"),
+      }
     ],
   },
   {
