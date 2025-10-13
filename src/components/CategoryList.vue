@@ -20,7 +20,7 @@
       >
         <span class="category-icon">{{ category.icon }}</span>
         <span class="category-name">{{ category.title }}</span>
-        <!-- <span class="category-count">({{ getCategoryCount(category.id) }})</span> -->
+        <span class="category-count">({{ category.diaryNum }})</span>
       </li>
     </ul>
   </div>

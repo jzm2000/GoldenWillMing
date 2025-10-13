@@ -24,6 +24,8 @@ export const getPublicDiaryList = (params) => get("/public/diary/list",params);
 export const likeDiary = (params) => post("/diary/like",params);
 // 日记分类
 export const categoryList = (params) => get("/diary-category/categoryList",params);
+// 公开日记分类
+export const publicCategoryList = (params) => get("/public/publicCategoryList",params);
 // 日记详情
 export const getDiaryById = (params) => post("/diary/detail",params);
 //#endregion 日记模块

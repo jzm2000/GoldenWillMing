@@ -64,7 +64,7 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 // 子组件：导航项
 import { h } from 'vue'
-import { RouterLink } from 'vue-router';
+import { RouterLink,useRouter } from 'vue-router';
 import { useUserStore } from "@/store/user.js";
 import { User, Edit, SwitchButton } from '@element-plus/icons-vue';
 import { NIcon } from 'naive-ui';
@@ -72,6 +72,7 @@ import { storeToRefs } from "pinia";
 import { logout } from "@/api/index.js";
 import defaultAvatar from '@/assets/img/avatar.jpeg'
 
+const router = useRouter();
 const userStore = useUserStore();
 const { userInfo } = storeToRefs(userStore);
 
@@ -156,7 +157,8 @@ const handleSelect = (key) =>{
         userStore.logout();
       };
     })
-    
+  }else if(key === 'profile'){
+    router.push('/profile');
   }
 }
 // 生命周期钩子
