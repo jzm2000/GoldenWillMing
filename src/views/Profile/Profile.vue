@@ -154,7 +154,7 @@ const tags = ref([
 ])
 
 const queryParams = reactive({
-  pageSize: 9,
+  pageSize: 10,
   pageNum: 1
 })
 

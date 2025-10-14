@@ -34,8 +34,8 @@
       </div>
       
       <!-- 日记封面图 -->
-      <div v-if="diary.coverImage" class="article-cover">
-        <img src="@/assets/img/banner5.png" alt="日记封面" class="cover-image" />
+      <div v-if="diary.imageUrl" class="article-cover">
+        <img :src="$baseURL + diary.imageUrl" alt="日记封面" class="cover-image" />
       </div>
       
       <!-- 日记内容 -->
@@ -96,14 +96,23 @@
             placeholder="写下你的评论..."
             class="comment-textarea"
             rows="3"
+            @blur="handleBlur"
+            maxlength="1000"
           ></textarea>
-          <button 
-            class="submit-comment-button"
-            :disabled="!newComment.trim()"
-            @click="submitComment"
-          >
-            发表评论
-          </button>
+          <div class="comment-actions">
+            <EmojiMartVue3 @change="handleEmojiChange">
+              <div style="font-size: 21px;cursor: pointer;">
+                😊
+              </div>
+            </EmojiMartVue3>
+            <button 
+              class="submit-comment-button"
+              :disabled="!newComment.trim()"
+              @click="submitComment"
+            >
+              发表评论
+            </button>
+          </div>
         </div>
       </div>
       
@@ -168,6 +177,7 @@ import { useRouter, useRoute } from 'vue-router';
 import { useUserStore } from '@/store/user.js';
 import { useDiaryStore } from '@/store/diary.js';
 import { getDiaryById } from '@/api/index.js';
+import EmojiMartVue3 from '@/components/EmojiMartVue3/EmojiMartVue3.vue'
 
 const router = useRouter();
 const route = useRoute();
@@ -187,7 +197,7 @@ const diary = ref({
   createdAt: '',
   category: '',
   tags: [],
-  coverImage: ''
+  imageUrl: ''
 });
 const likeCount = ref(0);
 const commentCount = ref(0);
@@ -197,10 +207,9 @@ const newComment = ref('');
 const comments = ref([]);
 const relatedArticles = ref([]);
 const defaultAvatar = './img/banner2.png';
-
+let cursorIndex = ref(0);
 // 获取日记ID
 diary.id = route.params.id;
-
 
 // 格式化日期
 const formatDate = (dateString) => {
@@ -214,7 +223,6 @@ const formatDate = (dateString) => {
     minute: '2-digit'
   });
 };
-
 // 格式化相对时间
 const formatRelativeTime = (dateString) => {
   if (!dateString) return '';
@@ -231,7 +239,6 @@ const formatRelativeTime = (dateString) => {
   
   return formatDate(dateString);
 };
-
 // 格式化内容
 const formatContent = (content) => {
   // 简单的内容格式化，实际项目中可能需要更复杂的处理
@@ -241,26 +248,22 @@ const formatContent = (content) => {
     .replace(/## (.*?)<br\/>/g, '<h2>$1</h2>')
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 };
-
 // 切换点赞状态
 const toggleLike = () => {
   isLiked.value = !isLiked.value;
   likeCount.value += isLiked.value ? 1 : -1;
   // 实际项目中这里应该调用API
 };
-
 // 切换收藏状态
 const toggleBookmark = () => {
   isBookmarked.value = !isBookmarked.value;
   // 实际项目中这里应该调用API
 };
-
 // 分享文章
 const shareArticle = () => {
   // 实际项目中实现分享功能
   alert('分享功能开发中...');
 };
-
 // 提交评论
 const submitComment = () => {
   if (!newComment.value.trim()) return;
@@ -280,22 +283,18 @@ const submitComment = () => {
   
   // 实际项目中这里应该调用API
 };
-
 // 聚焦评论框
 const focusComment = () => {
   commentTextarea.value?.focus();
 };
-
 // 导航到其他文章
 const navigateToArticle = (id) => {
   router.push(`/article-detail/${id}`);
 };
-
 // 返回上一页
 const goBack = () => {
   router.back();
 };
-
 // 模拟加载数据
 const loadDiaryData = async () => {
    let res = await getDiaryById({id:diary.id});
@@ -305,18 +304,19 @@ const loadDiaryData = async () => {
   }
   
   diary.value = {
-    title: '春日游记：寻找城市里的小确幸',
-    authorName: '小明同学',
+    title: res.data.title,
+    authorName: res.data.authorName,
     authorAvatar: './img/banner2.png',
-    content: '### 春日的早晨\n今天天气特别好，阳光透过窗户洒进房间，让人心情愉悦。决定出门走走，寻找城市里的春天。\n\n### 城市中的绿意\n沿着河边漫步，发现柳树已经抽出了新芽，嫩绿的颜色让人看了就觉得生机盎然。公园里的樱花也开了，粉色的花朵在微风中摇曳，美不胜收。\n\n### 街角的咖啡馆\n走累了，在街角发现一家温馨的咖啡馆。点了一杯手冲咖啡，坐在窗边，看着窗外的行人，享受片刻的宁静。\n\n### 偶遇的小猫\n回家的路上，遇到了一只可爱的流浪猫。它一点也不怕人，乖巧地蹭着我的手，让我忍不住停下脚步陪它玩了一会儿。\n\n今天真是美好的一天，虽然只是简单的散步，但却发现了许多平时忽略的美好。生活中的小确幸，往往就藏在这些平凡的瞬间里。',
-    createdAt: '2023-04-15T10:30:00.000Z',
+    content: res.data.content,
+    createdAt: res.data.create_at,
+    categoryId: res.data.category_id,
     category: '生活感悟',
     tags: ['春天', '城市漫步', '小确幸'],
-    coverImage: '/diary.png'
+    imageUrl: res.data.imageUrl
   };
   
-  likeCount.value = 42;
-  commentCount.value = 8;
+  likeCount.value = res.data.likeNum;
+  commentCount.value = res.data.commentNum;
   isLiked.value = false;
   isBookmarked.value = false;
   
@@ -346,7 +346,7 @@ const loadDiaryData = async () => {
       id: 2,
       title: '夏日午后的一场大雨',
       author: '小雨',
-      coverImage: '/diary.png',
+      imageUrl: '/diary.png',
       createdAt: '2023-06-10T15:20:00.000Z',
       views: 128
     },
@@ -354,7 +354,7 @@ const loadDiaryData = async () => {
       id: 3,
       title: '秋天的落叶',
       author: '秋风',
-      coverImage: '/diary.png',
+      imageUrl: '/diary.png',
       createdAt: '2023-10-25T09:45:00.000Z',
       views: 95
     },
@@ -362,13 +362,18 @@ const loadDiaryData = async () => {
       id: 4,
       title: '冬日里的一杯热茶',
       author: '暖阳',
-      coverImage: '/diary.png',
+      imageUrl: '/diary.png',
       createdAt: '2023-12-20T18:30:00.000Z',
       views: 210
     }
   ];
 };
-
+const handleEmojiChange = (emoji) => {
+  newComment.value = newComment.value.slice(0, cursorIndex.value) + emoji + newComment.value.slice(cursorIndex.value);
+};
+const handleBlur = (e) => {
+  cursorIndex.value = commentTextarea.value.selectionStart;
+};
 onBeforeMount(()=>{
 
 });
@@ -861,5 +866,11 @@ onMounted(() => {
 
 .bottom-decoration {
   height: 2rem;
+}
+
+.comment-actions{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 </style>

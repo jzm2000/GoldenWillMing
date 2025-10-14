@@ -5,7 +5,7 @@
       <span class="diary-category">{{ getCategoryName() }}</span>
     </div>
     <h3 class="diary-card-title">{{ diary.title }}</h3>
-    <p class="diary-card-excerpt">{{ diary.content }}</p>
+    <p class="diary-card-excerpt">{{ diary.content.slice(0,100) }} {{ diary.content.length > 100 ? '...' : '' }}</p>
     <div class="diary-card-footer">
       <div class="diary-card-stats">
         <div class="stat-group">
@@ -22,7 +22,7 @@
             {{ diary.views || 0 }}
           </span>
         </div>
-        <span class="stat" @click="openEditDiary(diary)">
+        <span class="stat" @click.stop="openEditDiary(diary)">
           <span class="iconfont icon-bianji"></span>
         </span>
       </div>
@@ -80,7 +80,13 @@ function likeDiaryHandle(item){
 };
 
 const navigateToDiary = () => {
-  console.log('跳转日记详情');
+  router.push({
+    name:"ArticleDetail",
+    params:{
+      id:props.diary.id
+    }
+  })
+  console.log('跳转日记详情',props.diary);
 }
 
 const openEditDiary = (diary) => {

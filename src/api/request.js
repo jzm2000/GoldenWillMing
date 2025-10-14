@@ -25,9 +25,9 @@ function handle(method = 'get',url,params,responseType='json',headers = {}){
 // 普通POST请求
 export const post = (url,params) => handle('post',url,params);
 // JSON请求
-export const postJson = (url,params) => handle('post',url,params,{ "Content-Type": "application/json" });
+export const postJson = (url,params) => handle('post',url,params,'',{ "Content-Type": "application/json" });
 // 表单请求
-export const postForm = (url,params) => handle('post',url,params,{ 'Content-Type':'multipart/form-data' });
+export const postForm = (url,params) => handle('post',url,params,'',{ 'Content-Type':'multipart/form-data' });
 
 // GET请求
 export const get = (url,params) => handle('get',url,params);

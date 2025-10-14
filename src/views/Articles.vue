@@ -364,7 +364,7 @@ const formatDate = (dateString) => {
   })
 }
 onMounted(() => {
-  articleStore.loadArticles()
+  articleStore.loadArticles();
 })
 </script>
 

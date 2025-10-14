@@ -34,3 +34,5 @@ export const getDiaryById = (params) => post("/diary/detail",params);
 export const getRecentNews = (params) => get("/recent-news/list",params);
 
 //#endregion 最新消息模块
+// 图片单上传
+export const uploadPhoto = (params) => postForm("/upload/photo",params);

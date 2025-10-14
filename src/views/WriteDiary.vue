@@ -51,7 +51,7 @@
               <div class="upload-section">
                 <label class="upload-label">
                   <i class="iconfont icon-tupian"></i> 添加图片
-                  <input type="file" accept="image/*" multiple @change="handleImageUpload" class="upload-input" />
+                  <input type="file" accept="image/*" @change="handleImageUpload" class="upload-input" />
                 </label>
                 <div class="upload-tip">支持JPG、PNG格式，单张不超过5MB</div>
               </div>
@@ -63,10 +63,10 @@
                   :key="index" 
                   class="image-preview-item"
                 >
-                  <img :src="image" alt="预览图片" class="preview-image" />
-                  <button @click="removeImage(index)" class="remove-image-btn">
-                    <i class="iconfont icon-shanchu"></i>
-                  </button>
+                  <img :src="$baseURL + image" alt="预览图片" class="preview-image" />
+                  <div @click="removeImage(index)" class="remove-image-btn">
+                    ×
+                  </div>
                 </div>
               </div>
             </div>
@@ -221,7 +221,7 @@ import { useRouter,useRoute } from 'vue-router'
 import { useArticleStore } from '../store/article.js'
 import { useUserStore } from "@/store/user.js"
 import { useDiaryStore } from "@/store/diary.js"
-import { addDiary,categoryList,updateDiary } from "@/api/index.js"
+import { addDiary,categoryList,updateDiary,uploadPhoto } from "@/api/index.js"
 
 const router = useRouter();
 const route = useRoute();
@@ -229,6 +229,17 @@ const articleStore = useArticleStore()
 const userStore = useUserStore();
 const diaryStore = useDiaryStore();
 let isEdited = ref(false);
+
+let categories = ref([]);
+// 选中的情绪和天气
+const selectedEmotions = ref([])
+const selectedWeather = ref('')
+const newTag = ref('')
+const uploadedImages = ref([])
+
+// 提示信息
+const showSuccess = ref(false)
+const successMessage = ref('')
 
 const { isEdit = false,categoryId = null,id = null } = route.query;
 // 日记表单数据
@@ -241,7 +252,7 @@ const diaryForm = reactive({
   categoryId: '',
   tags: [],
   privacy: '0',
-  images: []
+  imageUrl: []
 })
 
 // 情绪和天气选项
@@ -273,23 +284,22 @@ diaryForm.categoryId = categoryId ? categoryId : '';
 
 if(isEdited.value){
    Object.keys(diaryForm).forEach(key => {
-    diaryForm[key] = diaryStore.diaryInfo[key] || '';
+    if(key === 'imageUrl'){
+      diaryForm[key] = diaryStore.diaryInfo[key] || [];
+      if(diaryForm[key].length > 0){
+        uploadedImages.value.push(diaryForm[key]);
+        diaryForm[key] = [diaryStore.diaryInfo[key]]
+      }
+    }else{
+      diaryForm[key] = diaryStore.diaryInfo[key] || '';
+    }
    });
    diaryForm.categoryId = diaryStore.diaryInfo.category_id;
    diaryForm.created_at = formatDate(diaryStore.diaryInfo.created_at);
    console.log(diaryForm);
 }
 
-let categories = ref([]);
-// 选中的情绪和天气
-const selectedEmotions = ref([])
-const selectedWeather = ref('')
-const newTag = ref('')
-const uploadedImages = ref([])
 
-// 提示信息
-const showSuccess = ref(false)
-const successMessage = ref('')
 
 // 获取分类列表
 const getCategoryList = async() =>{
@@ -338,28 +348,27 @@ function removeTag(index) {
 
 // 处理图片上传
 function handleImageUpload(event) {
-  return showSuccessMessage('暂不支持添加图片');
   const files = event.target.files
-  if (files) {
-    Array.from(files).forEach(file => {
-      if (file.size < 5 * 1024 * 1024) { // 5MB限制
-        const reader = new FileReader()
-        reader.onload = (e) => {
-          uploadedImages.value.push(e.target.result)
-          diaryForm.images.push(e.target.result)
-        }
-        reader.readAsDataURL(file)
-      }
-    })
-  }
-  // 清空input，以便可以重复选择同一文件
-  event.target.value = ''
+  uploadPhoto({
+    file:files[0],
+  }).then(res =>{
+    console.log(res);
+    if(res.code == 200){
+      uploadedImages.value.push(res.url);
+      diaryForm.imageUrl.push(res.url);
+    }else {
+      showSuccessMessage(res.msg);
+      // 清空input
+      event.target.value = '';
+    }
+  })
+  console.log(files);
 }
 
 // 移除图片
 function removeImage(index) {
   uploadedImages.value.splice(index, 1)
-  diaryForm.images.splice(index, 1)
+  diaryForm.imageUrl.splice(index, 1)
 }
 
 // 保存草稿
@@ -398,6 +407,7 @@ async function publishDiary() {
     categoryId: diaryForm.categoryId,
     privacy: diaryForm.privacy,
     userId: userStore.userInfo?.id,
+    imageUrl: diaryForm.imageUrl[0],
   };
   let res;
   if (isEdited.value) {
