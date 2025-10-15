@@ -22,7 +22,7 @@
             {{ diary.views || 0 }}
           </span>
         </div>
-        <span class="stat" @click.stop="openEditDiary(diary)">
+        <span class="stat" @click.stop="openEditDiary(diary)" v-if="isEdit">
           <span class="iconfont icon-bianji"></span>
         </span>
       </div>
@@ -57,6 +57,10 @@ const props = defineProps({
   tags: {
     type: Array,
     default: () => []
+  },
+  isEdit: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -85,8 +89,7 @@ const navigateToDiary = () => {
     params:{
       id:props.diary.id
     }
-  })
-  console.log('跳转日记详情',props.diary);
+  });
 }
 
 const openEditDiary = (diary) => {
@@ -124,7 +127,7 @@ const formatDate = (dateString) => {
 
 <style lang="scss" scoped>
 .diary-card {
-  background-color: white;
+  background-color: var(--card-bg);
   border-radius: 16px;
   padding: 1.5rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
@@ -168,13 +171,13 @@ const formatDate = (dateString) => {
   font-size: 1.3rem;
   font-weight: 600;
   margin-bottom: 0.75rem;
-  color: var(--text-dark);
+  color: var(--text-color);
   line-height: 1.4;
 }
 
 .diary-card-excerpt {
   font-size: 1rem;
-  color: var(--text-medium);
+  color: var(--text-color);
   line-height: 1.6;
   margin-bottom: 1rem;
   flex: 1;

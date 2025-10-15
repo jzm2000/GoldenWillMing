@@ -1,8 +1,10 @@
 const themeConfig = {
   default: {
     "--primary-color": "#9e1f36",
+    "--primary-rgb": "255, 255, 255",
     "--primary-light": "#d9b38c",
     "--secondary-color": "#f5e8c8",
+    "--secondary-rgb": "245, 232, 200",
     "--accent-color": "#2d2327",
     "--text-color": "#333",
     "--text-light": "#2d2327",
@@ -10,13 +12,27 @@ const themeConfig = {
     "--card-bg": "#ffffff",
     "--border-color": "#d9d9d9",
   },
+  dark: {
+    "--primary-color": "#1e3a2d",
+    "--primary-rgb": "30, 58, 45",
+    "--primary-light": "#345842",
+    "--secondary-color": "#7d9d8c",
+    "--secondary-rgb": "125, 157, 140",
+    "--accent-color": "#9d7a56",
+    "--text-color": "#e0e6e1",
+    "--text-light": "#aab8b0",
+    "--bg-color": "#0f1a14",
+    "--card-bg": "#172820",
+    "--border-color": "#2a4034"
+  },
   purple: {
     '--primary-color': '#A87DC2', // 主色调：柔和的薰衣草紫（温柔、优雅，不刺眼）
-    
+    '--primary-rgb': '168, 125, 194',
     '--primary-light': '#E6D9F0',  // 主色浅色版：用于hover状态、次要强调
     
     // 辅助色：清新的淡玫瑰粉（与主色紫形成柔和对比）
     '--secondary-color': '#F2C4CE', 
+    '--secondary-rgb': '242, 196, 206',
     
     // 强调色：温暖的珊瑚橙（用于按钮、重点标签，提亮画面）
     '--accent-color': '#FF9F8A', 

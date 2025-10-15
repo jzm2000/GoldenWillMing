@@ -72,7 +72,7 @@
           <div class="quick-info">
             <div class="info-item">
               <span class="label">加入时间</span>
-              <span class="value">{{ userInfo.createTime || '未记录' }}</span>
+              <span class="value">{{ formatDate(userInfo.created_at) || '未记录' }}</span>
             </div>
             <div class="info-item">
               <span class="label">邮箱</span>
@@ -96,6 +96,7 @@
               :diary="diary"
               :categories="categories"
               :tags="tags"
+              :isEdit="isEdit"
             />
           </transition-group>
 
@@ -111,7 +112,7 @@
   </div>
 </template>
 <script setup>
-import { ref, reactive, onBeforeMount } from 'vue'
+import { ref, reactive, onBeforeMount,computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/store/user.js'
 import { storeToRefs } from 'pinia'
@@ -128,17 +129,10 @@ const message = useMessage()
 const userStore = useUserStore()
 const { userInfo: storeUserInfo } = storeToRefs(userStore)
 
-const userInfo = reactive({
-  avatar: defaultAvatar,
-  nickname: '',
-  bio: '',
-  createTime: '',
-  email: '',
-  diaryNum: 0,
-  likeNum: 0,
-  fansNum: 0
-})
-
+const userInfo = computed(() => ({
+  ...storeUserInfo.value
+}));
+let isEdit = ref(true);
 const searchQuery = ref('')
 const diaries = ref([])
 const categories = ref([])
@@ -214,6 +208,17 @@ function toWriteDiary() {
 
 function openEditUserInfo() {
   router.push({ name: 'ProfileEdit' })
+}
+
+const formatDate = (dateString) => {
+  const date = new Date(dateString)
+  return date.toLocaleDateString('zh-CN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 }
 
 onBeforeMount(async () => {
@@ -388,7 +393,7 @@ onBeforeMount(async () => {
 }
 
 .search-box {
-  background-color: #fff;
+  background-color: var(--card-bg);
   border-radius: 0.75rem;
   padding: 0.5rem 1rem;
   transition: all 0.3s ease;

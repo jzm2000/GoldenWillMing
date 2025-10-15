@@ -33,15 +33,15 @@
                 <h3 class="card-title">基本信息</h3>
                 <div class="form-item">
                   <label class="form-label">昵称</label>
-                  <GInput placeholder="请输入你的昵称" v-model="form.nickname" />
+                  <GInput placeholder="请输入你的昵称" v-model="form.nickname" required minlength="2" maxlength="10" />
                 </div>
                 <div class="form-item">
                   <label class="form-label">邮箱</label>
-                  <GInput placeholder="请输入邮箱" v-model="form.email" />
+                  <GInput placeholder="请输入邮箱" v-model="form.email" required email />
                 </div>
                 <div class="form-item">
                   <label class="form-label">个人简介</label>
-                  <textarea class="g-textarea" rows="4" v-model="form.bio" placeholder="用几句话介绍你自己吧"></textarea>
+                  <textarea class="g-textarea" rows="4" v-model="form.intro" placeholder="用几句话介绍你自己吧"></textarea>
                 </div>
                 <div class="form-actions">
                   <button type="submit" class="save-btn">保存修改</button>
@@ -57,20 +57,20 @@
 </template>
 
 <script setup>
-import { reactive, onBeforeMount } from 'vue'
+import { reactive, onBeforeMount,getCurrentInstance } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/store/user.js'
 import { storeToRefs } from 'pinia'
 import { useMessage } from 'naive-ui'
 import { postJson, postForm } from '@/api/request.js'
-import { getUserInfo } from '@/api/index.js'
+import { getUserInfo,updateUserInfo,uploadPhoto } from '@/api/index.js'
 
 import GInput from '@/components/GoldUI/g-input/input.vue'
 import defaultAvatar from '@/assets/img/1.jpg'
 
 const router = useRouter()
 const message = useMessage()
-
+const { proxy } = getCurrentInstance()
 const userStore = useUserStore()
 const { userInfo: storeUserInfo } = storeToRefs(userStore)
 
@@ -79,13 +79,13 @@ const form = reactive({
   avatarPreview: '',
   nickname: '',
   email: '',
-  bio: ''
+  intro: ''
 })
 
 function syncForm(data) {
   form.nickname = data.nickname || ''
   form.email = data.email || ''
-  form.bio = data.bio || ''
+  form.intro = data.intro || ''
   form.avatarPreview = data.avatar || ''
 }
 
@@ -100,19 +100,20 @@ async function initUserInfo() {
   }
 }
 
-function onAvatarChange(e) {
-  const file = e.target.files?.[0]
-  if (!file) return
-  if (file.size > 2 * 1024 * 1024) {
-    message.error('图片大小不能超过2MB')
-    return
-  }
-  form.avatarFile = file
-  const reader = new FileReader()
-  reader.onload = () => {
-    form.avatarPreview = reader.result
-  }
-  reader.readAsDataURL(file)
+function onAvatarChange(event) {
+  const files = event.target.files
+  uploadPhoto({
+    file:files[0],
+  }).then(res =>{
+    console.log(res);
+    if(res.code == 200){
+      form.avatarPreview = proxy.$baseURL +  res.url;
+    }else {
+      message.error(res.msg);
+      // 清空input
+      event.target.value = '';
+    }
+  })
 }
 
 function resetAvatar() {
@@ -122,26 +123,21 @@ function resetAvatar() {
 
 async function handleSubmit() {
   try {
+    if(!storeUserInfo.value?.id){
+      message.error('用户ID不存在')
+      return
+    };
     // 先更新文本信息
-    const res1 = await postJson('/users/update', {
+    const res = await updateUserInfo({
       nickname: form.nickname,
       email: form.email,
-      bio: form.bio
-    })
-    if (!(res1 && res1.code === 200)) {
-      throw new Error(res1?.msg || '资料更新失败')
+      intro: form.intro,
+      avatar: form.avatarPreview,
+      userId: storeUserInfo.value?.id || ''
+    });
+    if(res.code!==200){
+      return message.error(res.msg || '资料更新失败');
     }
-
-    // 若选择了新头像，上传头像（如后端不支持可忽略此步）
-    if (form.avatarFile) {
-      const fd = new FormData()
-      fd.append('file', form.avatarFile)
-      const res2 = await postForm('/users/avatar', fd)
-      if (!(res2 && res2.code === 200)) {
-        throw new Error(res2?.msg || '头像上传失败')
-      }
-    }
-
     // 成功后刷新用户信息
     const latest = await getUserInfo()
     if (latest && latest.code === 200) {
@@ -221,7 +217,11 @@ onBeforeMount(async () => {
   font-weight: 700;
   margin-bottom: .75rem;
 }
-
+.avatar-card{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 .avatar-preview {
   width: 160px;
   height: 160px;

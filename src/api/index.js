@@ -9,6 +9,8 @@ export const register = (params) => post("/users/register",params);
 export const getUserInfo = () => post("/users/info");
 // 退出登录
 export const logout = () => post("/users/logout");
+// 修改用户信息
+export const updateUserInfo = (params) => post("/users/update",params);
 //#endregion 用户模块
 
 //#region日记模块

@@ -10,7 +10,7 @@ import './style.css'
 import './styles/base.scss'
 console.log(import.meta.env.MODE);
 const app = createApp(App);
-app.config.globalProperties.$baseURL = import.meta.env.MODE === 'development' ? 'http://127.0.0.1:1949' : 'http://182.92.135.189';
+app.config.globalProperties.$baseURL = 'http://182.92.135.189';
 // 注册 Element Plus 图标组件
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
   app.component(key, component)

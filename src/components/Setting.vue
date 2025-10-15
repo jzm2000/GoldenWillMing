@@ -60,6 +60,7 @@ onMounted(()=>{
     htmlStyle = getComputedStyle(root);
     rootCss.value = {
         '--primary-color': htmlStyle.getPropertyValue('--primary-color'),
+        '--primary-rgb': htmlStyle.getPropertyValue('--primary-rgb'),
         '--primary-light': htmlStyle.getPropertyValue('--primary-light'),
         '--secondary-color': htmlStyle.getPropertyValue('--secondary-color'),
         '--accent-color': htmlStyle.getPropertyValue('--accent-color'),

@@ -43,8 +43,16 @@
                 placeholder="开始记录你的一天..."
                 class="diary-content-input"
                 @input="updateExcerpt"
+                @blur="handleBlur"
+                ref="contentInputRef"
               ></textarea>
             </div>
+
+            <EmojiMartVue3 @change="handleEmojiChange">
+              <div style="font-size: 21px;cursor: pointer;margin-bottom: 1rem;">
+                😊
+              </div>
+            </EmojiMartVue3>
 
             <!-- 图片上传区域 -->
             <div class="editor-section">
@@ -222,6 +230,7 @@ import { useArticleStore } from '../store/article.js'
 import { useUserStore } from "@/store/user.js"
 import { useDiaryStore } from "@/store/diary.js"
 import { addDiary,categoryList,updateDiary,uploadPhoto } from "@/api/index.js"
+import EmojiMartVue3 from "@/components/EmojiMartVue3/EmojiMartVue3.vue"
 
 const router = useRouter();
 const route = useRoute();
@@ -231,11 +240,13 @@ const diaryStore = useDiaryStore();
 let isEdited = ref(false);
 
 let categories = ref([]);
+let cursorIndex = ref(0);
 // 选中的情绪和天气
 const selectedEmotions = ref([])
 const selectedWeather = ref('')
 const newTag = ref('')
 const uploadedImages = ref([])
+const contentInputRef = ref(null);
 
 // 提示信息
 const showSuccess = ref(false)
@@ -282,6 +293,7 @@ isEdited.value = isEdit === 'true';
 diaryForm.id = id ? id : undefined;
 diaryForm.categoryId = categoryId ? categoryId : '';
 
+
 if(isEdited.value){
    Object.keys(diaryForm).forEach(key => {
     if(key === 'imageUrl'){
@@ -297,8 +309,9 @@ if(isEdited.value){
    diaryForm.categoryId = diaryStore.diaryInfo.category_id;
    diaryForm.created_at = formatDate(diaryStore.diaryInfo.created_at);
    console.log(diaryForm);
+} else {
+  diaryForm.created_at = formatDate(new Date());
 }
-
 
 
 // 获取分类列表
@@ -419,11 +432,26 @@ async function publishDiary() {
   if (res.code == 200) {
     showSuccessMessage('日记发布成功！');
     setTimeout(() => {
-      router.push('/articles')
+      router.back();
     }, 1500)
   } else {
     showSuccessMessage(res.msg);
   }
+}
+function handleEmojiChange(emoji){
+  let content = diaryForm.content;
+  content = content.substring(0,cursorIndex.value) + emoji + content.substring(cursorIndex.value);
+  diaryForm.content = content;
+
+  cursorIndex.value += emoji.length;
+  contentInputRef.value.focus();
+
+  setTimeout(() => {
+    contentInputRef.value.selectionStart = contentInputRef.value.selectionEnd =  cursorIndex.value;
+  }, 0);
+}
+function handleBlur(e){
+  cursorIndex.value = e.target.selectionStart;
 }
 
 // 显示成功消息

@@ -66,8 +66,8 @@
                       <span class="diary-item-views" v-if="item.viewCount">{{item.viewCount}} 浏览</span>
                     </div>
                   </div>
-                  <div class="diary-item-title">{{item.title}}</div>
-                  <div class="diary-item-content">{{item.content}}</div>
+                  <h2 class="diary-item-title" @click="commentDiary(item.id)">{{item.title}}</h2>
+                  <div class="diary-item-content">{{item.content.slice(0,100)}} {{ item.content.length > 100 ? '...' : '' }}</div>
                   <div class="diary-item-footer">
                     <div class="diary-item-like" @click="likeDiaryHandle(item)">
                       <i :class="['iconfont',item.isLiked ? 'icon-aixin1' : 'icon-aixin']"></i>
@@ -305,8 +305,7 @@ onUnmounted(()=>{
     width: 100%;
   }
   .bg_cover{
-    background-color: rgba(249, 245, 235,0.6);
-
+    background: rgba(var(--primary-rgb),0.6);
   }
 }
 /* Hero Section */
@@ -572,7 +571,7 @@ onUnmounted(()=>{
   }
 }
 .search-box{
-  background-color: #fff;
+  background-color: var(--card-bg);
   border-radius: 0.75rem;
   padding: 0.5rem 1rem;
   margin-top: 1rem;
@@ -828,11 +827,11 @@ onUnmounted(()=>{
 }
 
 .diary-item-title {
-  font-size: var(--font-size-xl);
   font-weight: 600;
-  color: var(--text-dark);
+  color: var(--text-color);
   margin-bottom: 1rem;
   line-height: 1.4;
+  cursor: pointer;
 }
 
 .diary-item-content {
@@ -954,7 +953,7 @@ onUnmounted(()=>{
   justify-content: center;
   align-items: center;
   margin-top: 1rem;
-  background-color: #fff;
+  background-color: var(--card-bg);
   border-radius: 0.75rem;
 }
 

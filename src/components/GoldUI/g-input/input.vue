@@ -9,6 +9,7 @@
         @focus="handleFocus"
         v-bind="attrs"
         :class="['g-input__inner']"
+        :value="modelValue"
       />
     </div>
   </div>
@@ -18,7 +19,10 @@
 import { ref, watch,useAttrs } from 'vue'
 
 const props = defineProps({
-
+  modelValue: {
+    type: String,
+    default: ''
+  }
 });
 const attrs = useAttrs();
 

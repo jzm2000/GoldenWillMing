@@ -59,7 +59,7 @@ const getCategoryCount = (categoryId) => {
 
 <style lang="scss" scoped>
 .categories-section {
-  background-color: white;
+  background-color: var(--card-bg);
   border-radius: 16px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;

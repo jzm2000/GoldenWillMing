@@ -15,19 +15,19 @@
         
         <div class="article-meta">
           <div class="author-info">
-            <img 
-              :src="diary.authorAvatar || defaultAvatar" 
+            <img
+              :src="userInfo.avatar || defaultAvatar" 
               alt="作者头像" 
               class="author-avatar"
             />
             <div class="author-details">
-              <span class="author-name">{{ diary.authorName || '未知作者' }}</span>
-              <span class="publish-date">{{ formatDate(diary.createdAt) || '2023-05-15' }}</span>
+              <span class="author-name">{{ diary.authorName }}</span>
+              <span class="publish-date">{{ diary.createdAt }}</span>
             </div>
           </div>
           
           <div class="article-tags">
-            <span v-if="diary.category" class="category-tag">{{ diary.category }}</span>
+            <span v-if="diary.category" class="category-tag">{{ diary.categoryName }}</span>
             <span v-for="tag in diary.tags" :key="tag" class="tag-item">#{{ tag }}</span>
           </div>
         </div>
@@ -35,16 +35,14 @@
       
       <!-- 日记封面图 -->
       <div v-if="diary.imageUrl" class="article-cover">
-        <img :src="$baseURL + diary.imageUrl" alt="日记封面" class="cover-image" />
+        <n-image object-fit="cover" :src="$baseURL + diary.imageUrl" alt="日记封面" class="cover-image" />
       </div>
       
       <!-- 日记内容 -->
       <div class="article-content">
         <div v-if="diary.content" v-html="formatContent(diary.content)"></div>
         <div v-else class="placeholder-content">
-          <p>这是一篇精彩的日记内容...</p>
-          <p>在这里，作者分享了他们的思考、感受和生活中的美好时刻。</p>
-          <p>日记是记录生活、表达情感的重要方式，每一篇日记都承载着独特的记忆和价值。</p>
+          空空如也
         </div>
       </div>
       
@@ -72,10 +70,6 @@
           <span>分享</span>
         </button>
         
-        <button class="interaction-button book-button" @click="toggleBookmark">
-          <i :class="['iconfont', isBookmarked ? 'icon-shoucang' : 'icon-shoucang1']"></i>
-          <span>{{ isBookmarked ? '已收藏' : '收藏' }}</span>
-        </button>
       </div>
     </div>
     
@@ -178,11 +172,13 @@ import { useUserStore } from '@/store/user.js';
 import { useDiaryStore } from '@/store/diary.js';
 import { getDiaryById } from '@/api/index.js';
 import EmojiMartVue3 from '@/components/EmojiMartVue3/EmojiMartVue3.vue'
-
+import defaultAvatar from "@/assets/img/1.jpg"
 const router = useRouter();
 const route = useRoute();
 const userStore = useUserStore();
 const diaryStore = useDiaryStore();
+
+const userInfo = computed(() => userStore.getUserInfo);
 
 // 引用
 const commentTextarea = ref(null);
@@ -192,12 +188,13 @@ const diary = ref({
   id:"",
   title: '',
   authorName: '',
-  authorAvatar: '',
+  imageUrl: '',
   content: '',
   createdAt: '',
   category: '',
   tags: [],
-  imageUrl: ''
+  imageUrl: '',
+  categoryName:''
 });
 const likeCount = ref(0);
 const commentCount = ref(0);
@@ -206,7 +203,7 @@ const isBookmarked = ref(false);
 const newComment = ref('');
 const comments = ref([]);
 const relatedArticles = ref([]);
-const defaultAvatar = './img/banner2.png';
+// const defaultAvatar = defaultAvatar;
 let cursorIndex = ref(0);
 // 获取日记ID
 diary.id = route.params.id;
@@ -254,11 +251,6 @@ const toggleLike = () => {
   likeCount.value += isLiked.value ? 1 : -1;
   // 实际项目中这里应该调用API
 };
-// 切换收藏状态
-const toggleBookmark = () => {
-  isBookmarked.value = !isBookmarked.value;
-  // 实际项目中这里应该调用API
-};
 // 分享文章
 const shareArticle = () => {
   // 实际项目中实现分享功能
@@ -301,22 +293,9 @@ const loadDiaryData = async () => {
   if(res.code === 200){
     // diary.value = res.data;
     console.log(res);
+    Object.assign(diary.value, res.data);
   }
   
-  diary.value = {
-    title: res.data.title,
-    authorName: res.data.authorName,
-    authorAvatar: './img/banner2.png',
-    content: res.data.content,
-    createdAt: res.data.create_at,
-    categoryId: res.data.category_id,
-    category: '生活感悟',
-    tags: ['春天', '城市漫步', '小确幸'],
-    imageUrl: res.data.imageUrl
-  };
-  
-  likeCount.value = res.data.likeNum;
-  commentCount.value = res.data.commentNum;
   isLiked.value = false;
   isBookmarked.value = false;
   
@@ -370,9 +349,17 @@ const loadDiaryData = async () => {
 };
 const handleEmojiChange = (emoji) => {
   newComment.value = newComment.value.slice(0, cursorIndex.value) + emoji + newComment.value.slice(cursorIndex.value);
+  // 更新光标位置到插入的emoji后面
+  cursorIndex.value = cursorIndex.value + emoji.length;
+  // 重新设置焦点和光标位置
+  setTimeout(() => {
+    commentTextarea.value.focus();
+    commentTextarea.value.selectionStart = cursorIndex.value;
+    commentTextarea.value.selectionEnd = cursorIndex.value;
+  }, 0);
 };
 const handleBlur = (e) => {
-  cursorIndex.value = commentTextarea.value.selectionStart;
+  cursorIndex.value = e.target.selectionStart;
 };
 onBeforeMount(()=>{
 
@@ -452,12 +439,11 @@ onMounted(() => {
 }
 
 .article-header {
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
   
   .article-title {
-    font-size: var(--font-size-2xl);
     font-weight: 700;
-    color: var(--text-dark);
+    color: var(--text-color);
     margin-bottom: 1.5rem;
     line-height: 1.3;
     
@@ -529,12 +515,16 @@ onMounted(() => {
 .article-cover {
   margin-bottom: 2rem;
   
-  .cover-image {
+  :deep(.cover-image){
     width: 100%;
-    height: auto;
-    border-radius: 16px;
-    object-fit: cover;
-    max-height: 500px;
+    img{
+      width: 100%;
+      height: auto;
+      border-radius: 16px;
+      object-fit: cover;
+      max-height: 500px;
+      cursor: zoom-in;
+    }
   }
 }
 
@@ -839,9 +829,8 @@ onMounted(() => {
         gap: 0.75rem;
         
         .related-article-title {
-          font-size: var(--font-size-lg);
           font-weight: 600;
-          color: var(--text-dark);
+          color: var(--text-color);
           margin-bottom: 0.5rem;
           line-height: 1.3;
         }

@@ -647,7 +647,7 @@ onMounted(() => {
   align-items: center;
   margin-bottom: 2rem;
   padding: 1rem 0;
-  background-color: white;
+  background-color: var(--card-bg);
   border-radius: 16px;
   padding: 1rem 1.5rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
