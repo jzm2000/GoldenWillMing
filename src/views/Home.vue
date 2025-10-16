@@ -104,7 +104,7 @@
           <div class="newsletter-content">
             <h2>订阅我的更新</h2>
             <p>获取最新日记和技术资讯，直接发送到您的邮箱</p>
-            <form class="newsletter-form">
+            <form class="newsletter-form" @submit.prevent="subscribeNewsletter">
               <input type="email" placeholder="您的邮箱地址" class="email-input" />
               <button type="submit" class="btn btn-primary">订阅</button>
             </form>
@@ -113,7 +113,7 @@
       </section>
     </div>
 
-    <img src="@/assets/img/banner4.png" alt="" class="mainBanner">
+    <img src="@/assets/img/banner5.png" alt="" class="mainBanner">
   </div>
 </template>
 
@@ -221,9 +221,16 @@ const getUserInfoHandle = async () => {
     });
     userInfo.avatar = res.data.avatar || avatar;
   }else {
-    message.error(res.msg);
+    // message.error(res.msg);
   }
 };
+
+// 订阅新闻邮件
+function subscribeNewsletter(){
+  message.info('正在开发中。。。');
+}
+
+
 
 // 函数执行
 onBeforeMount(async ()=>{
