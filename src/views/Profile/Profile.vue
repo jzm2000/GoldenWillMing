@@ -42,7 +42,7 @@
               <img :src="userInfo.avatar || defaultAvatar" :alt="userInfo.nickname || '用户头像'">
             </div>
             <div class="user-name">{{ userInfo.nickname || '未命名用户' }}</div>
-            <p class="user-bio">{{ userInfo.bio || '这个人很低调，还没有写简介。' }}</p>
+            <p class="user-bio">{{ userInfo.intro || '这个人很低调，还没有写简介。' }}</p>
             <ul class="user-stats">
               <li>
                 <span class="num">{{ userInfo.diaryNum || 0 }}</span>

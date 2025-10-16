@@ -37,7 +37,7 @@
                 </div>
                 <div class="form-item">
                   <label class="form-label">邮箱</label>
-                  <GInput placeholder="请输入邮箱" v-model="form.email" required email />
+                  <GInput placeholder="请输入邮箱" v-model="form.email" />
                 </div>
                 <div class="form-item">
                   <label class="form-label">个人简介</label>
@@ -130,9 +130,9 @@ async function handleSubmit() {
     // 先更新文本信息
     const res = await updateUserInfo({
       nickname: form.nickname,
-      email: form.email,
-      intro: form.intro,
-      avatar: form.avatarPreview,
+      email: form.email || undefined,
+      intro: form.intro || undefined,
+      avatar: form.avatarPreview || undefined,
       userId: storeUserInfo.value?.id || ''
     });
     if(res.code!==200){

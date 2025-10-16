@@ -159,7 +159,8 @@ const handleSelect = (key) =>{
     })
   }else if(key === 'profile'){
     router.push('/profile');
-  }
+  };
+  isMobileMenuOpen.value = false;
 }
 // 生命周期钩子
 onMounted(() => {

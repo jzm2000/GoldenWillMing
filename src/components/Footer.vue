@@ -98,7 +98,8 @@
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.footer-bottom p {
+.footer-bottom p,
+.footer-bottom a {
   color: rgba(255, 255, 255, 0.5);
   margin-bottom: 0;
   font-size: var(--font-size-sm);

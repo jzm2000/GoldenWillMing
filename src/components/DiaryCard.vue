@@ -1,10 +1,19 @@
 <template>
-  <div class="diary-card" @click="navigateToDiary">
+  <div class="diary-card">
     <div class="diary-card-header">
-      <span class="diary-date">{{ formatDate(diary.created_at) }}</span>
-      <span class="diary-category">{{ getCategoryName() }}</span>
+      <div class="diary-user">
+        <div class="user-avatar">
+          <img :src="diary.avatar || defaultAvatar" :alt="diary.nickname || '用户头像'">
+        </div>
+        <div class="user-name-date">
+          <div class="user-name">{{ diary.author_name || '未命名用户' }}</div>
+          <span class="diary-date">{{ formatDate(diary.created_at) }}</span>
+        </div>
+      </div>
+      
+      <span class="diary-category">{{diary.categoryName || '未知分类' }}</span>
     </div>
-    <h3 class="diary-card-title">{{ diary.title }}</h3>
+    <h3 class="diary-card-title" @click="navigateToDiary">{{ diary.title }}</h3>
     <p class="diary-card-excerpt">{{ diary.content.slice(0,100) }} {{ diary.content.length > 100 ? '...' : '' }}</p>
     <div class="diary-card-footer">
       <div class="diary-card-stats">
@@ -45,6 +54,7 @@ import { useRouter } from 'vue-router'
 import { likeDiary } from "@/api/index.js";
 import { useUserStore } from "@/store/user.js";
 import { useDiaryStore } from "@/store/diary.js";
+import defaultAvatar from '@/assets/img/1.jpg'
 const props = defineProps({
   diary: {
     type: Object,
@@ -151,7 +161,7 @@ const formatDate = (dateString) => {
   align-items: center;
   margin-bottom: 1rem;
   font-size: 0.875rem;
-  color: var(--text-light);
+  color: var(--text-color);
 }
 
 .diary-date {
@@ -173,6 +183,7 @@ const formatDate = (dateString) => {
   margin-bottom: 0.75rem;
   color: var(--text-color);
   line-height: 1.4;
+  cursor: pointer;
 }
 
 .diary-card-excerpt {
@@ -214,7 +225,22 @@ const formatDate = (dateString) => {
   gap: 0.5rem;
   flex-wrap: wrap;
 }
-
+.diary-user{
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  .user-avatar{
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    img{
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+}
 .diary-tag {
   padding: 0.25rem 0.5rem;
   background-color: #f5f5f5;

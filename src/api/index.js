@@ -29,7 +29,7 @@ export const categoryList = (params) => get("/diary-category/categoryList",param
 // 公开日记分类
 export const publicCategoryList = (params) => get("/public/publicCategoryList",params);
 // 日记详情
-export const getDiaryById = (params) => post("/diary/detail",params);
+export const getDiaryById = (params) => post("/public/detail",params);
 //#endregion 日记模块
 
 //#region 最新消息模块

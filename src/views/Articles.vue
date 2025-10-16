@@ -3,7 +3,7 @@
     <!-- 页面标题区域 -->
     <header class="diary-header">
       <div class="container">
-        <h1 class="diary-title" data-text="我的日记空间">日记空间</h1>
+        <h1 class="diary-title" data-text="日记大厅">日记大厅</h1>
         <p class="diary-subtitle">记录生活点滴，珍藏美好回忆</p>
         <div class="diary-stats">
           <span class="stat-item">
