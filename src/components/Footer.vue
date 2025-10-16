@@ -24,8 +24,11 @@
       </div>
       
       <div class="footer-bottom">
-        <p>&copy; {{ new Date().getFullYear() }} 心情日记网 保留所有权利</p>
-        <p><a href="https://beian.miit.gov.cn" target="_blank">此处备案号备案成功后填写</a></p>
+        <p><a href="/file/disclaimer.html" target="_blank">| 免责声明 |</a></p>
+        <p>本网站部分内容来源于网络，仅供学习和参考之用。</p>
+        <p>本网站一切内容不代表本网站的立场，不承担任何责任。</p>
+        <p>如无意中侵犯了您的权益，请及时通过电子邮件(2842688813@qq.com)告知我们，本网站将立即删除。</p>
+        <p><a href="https://beian.miit.gov.cn" target="_blank">赣ICP备2025074131号</a></p>
       </div>
     </div>
   </footer>
@@ -100,11 +103,14 @@
 
 .footer-bottom p,
 .footer-bottom a {
-  color: rgba(255, 255, 255, 0.5);
-  margin-bottom: 0;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 4px;
   font-size: var(--font-size-sm);
+  transition: color 0.3s ease;
 }
-
+.footer-bottom a:hover {
+  color: white;
+}
 @media (max-width: 768px) {
   .footer-content {
     grid-template-columns: 1fr;

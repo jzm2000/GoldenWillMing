@@ -420,7 +420,7 @@ async function publishDiary() {
     categoryId: diaryForm.categoryId,
     privacy: diaryForm.privacy,
     userId: userStore.userInfo?.id,
-    imageUrl: diaryForm.imageUrl[0],
+    imageUrl: diaryForm.imageUrl[0] || '',
   };
   let res;
   if (isEdited.value) {
