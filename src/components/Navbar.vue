@@ -161,6 +161,7 @@ const handleSelect = (key) =>{
     router.push('/profile');
   };
   isMobileMenuOpen.value = false;
+  document.body.style.overflow = ''
 }
 // 生命周期钩子
 onMounted(() => {
