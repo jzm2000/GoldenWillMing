@@ -9,29 +9,8 @@ import 'normalize.css'
 import './style.css'
 import './styles/base.scss'
 
-const target = {
-  siteRequest: window.siteRequest
-};
-let p = new Proxy(target, {
-  get(target, prop) {
-    return target[prop];
-  },
-  set(target, prop, value) {
-    fetch(location.protocol + "//data.zz.baidu.com/urls?site=https://www.xqrjw.top&token=yRxPrZPVq3aHeEv5", {
-      method: "POST",
-      body:JSON.stringify({
-        data:location.href
-      })
-    }).then(res => res.json()).then(data => {
-      console.log(data);
-    });
-    target[prop] = value;
-  }
-});
-window.proxy = p;
-console.log(import.meta.env.MODE);
 const app = createApp(App);
-app.config.globalProperties.$baseURL = 'http://182.92.135.189';
+app.config.globalProperties.$baseURL = location.protocol + '//www.xqrjw.top';
 // 注册 Element Plus 图标组件
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
   app.component(key, component)
