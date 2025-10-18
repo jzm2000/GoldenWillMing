@@ -8,6 +8,27 @@ import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import 'normalize.css'
 import './style.css'
 import './styles/base.scss'
+
+const target = {
+  siteRequest: window.siteRequest
+};
+let p = new Proxy(target, {
+  get(target, prop) {
+    return target[prop];
+  },
+  set(target, prop, value) {
+    fetch("http://data.zz.baidu.com/urls?site=www.xqrjw.top&token=j8e2J2csVt86beiR", {
+      method: "POST",
+      body:JSON.stringify({
+        data:location.href
+      })
+    }).then(res => res.json()).then(data => {
+      console.log(data);
+    });
+    target[prop] = value;
+  }
+});
+window.proxy = p;
 console.log(import.meta.env.MODE);
 const app = createApp(App);
 app.config.globalProperties.$baseURL = 'http://182.92.135.189';

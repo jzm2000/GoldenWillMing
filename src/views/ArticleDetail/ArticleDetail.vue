@@ -139,7 +139,7 @@
     </div>
     
     <!-- 相关推荐 -->
-    <div class="related-articles-section">
+    <!-- <div class="related-articles-section">
       <h3 class="related-articles-title">
         <i class="iconfont icon-tuijian"></i>
         相关推荐
@@ -158,7 +158,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
     
     <!-- 底部装饰 -->
     <div class="bottom-decoration"></div>
