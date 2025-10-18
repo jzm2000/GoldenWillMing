@@ -17,7 +17,7 @@ let p = new Proxy(target, {
     return target[prop];
   },
   set(target, prop, value) {
-    fetch("http://data.zz.baidu.com/urls?site=www.xqrjw.top&token=j8e2J2csVt86beiR", {
+    fetch(location.protocol + "//data.zz.baidu.com/urls?site=www.xqrjw.top&token=j8e2J2csVt86beiR", {
       method: "POST",
       body:JSON.stringify({
         data:location.href
