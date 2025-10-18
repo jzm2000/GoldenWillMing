@@ -10,7 +10,8 @@ import './style.css'
 import './styles/base.scss'
 
 const app = createApp(App);
-app.config.globalProperties.$baseURL = location.protocol + '//www.xqrjw.top';
+// 全局注册 $baseURL 接口或静态资源url
+app.config.globalProperties.$baseURL = location.protocol + '//api.xqrjw.top';
 // 注册 Element Plus 图标组件
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
   app.component(key, component)
