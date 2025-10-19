@@ -12,7 +12,6 @@
           <ul>
             <li><router-link to="/">首页</router-link></li>
             <li><router-link to="/articles">日记</router-link></li>
-            <li><router-link to="/about">关于</router-link></li>
           </ul>
         </div>
         

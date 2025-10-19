@@ -317,13 +317,11 @@ onUnmounted(()=>{
 }
 /* Hero Section */
 .hero {
-  /* background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); */
-  // background: url('@/assets/img/banner2.jpg') no-repeat center center;
   background-size: 100%;
   color: white;
   position: relative;
   overflow: hidden;
-  min-height: 100vh;
+  min-height: calc(100vh - 60px);
   .container{
      position: absolute;
      inset: 0;
