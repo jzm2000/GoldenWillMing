@@ -27,13 +27,17 @@
         <p>本网站部分内容来源于网络，仅供学习和参考之用。</p>
         <p>本网站一切内容不代表本网站的立场，不承担任何责任。</p>
         <p>如无意中侵犯了您的权益，请及时通过电子邮件(2842688813@qq.com)告知我们，本网站将立即删除。</p>
-        <p><a href="https://beian.miit.gov.cn" target="_blank">赣ICP备2025074131号</a></p>
+        <p class="footer-beian">
+          <img src="../assets/img/gn_logo.png" alt="" width="16px">
+          <a href="https://beian.mps.gov.cn/#/query/webSearch?code=36011102001172" rel="noreferrer" target="_blank">赣公网安备36011102001172号</a>
+          <a href="https://beian.miit.gov.cn" target="_blank">赣ICP备2025074131号</a>
+        </p>
       </div>
     </div>
   </footer>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .footer {
   background-color: #35495e;
   color: white;
@@ -107,8 +111,20 @@
   font-size: var(--font-size-sm);
   transition: color 0.3s ease;
 }
-.footer-bottom a:hover {
-  color: white;
+.footer-beian{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  a{
+    margin: 0;
+    color: #409EFF;
+  }
+  p{
+    margin: 0;
+  }
+  a:nth-of-type(2){
+    margin-left: 20px;
+  }
 }
 @media (max-width: 768px) {
   .footer-content {
