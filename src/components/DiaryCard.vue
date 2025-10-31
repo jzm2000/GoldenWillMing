@@ -22,7 +22,7 @@
             <i :class="['iconfont',diary.isLiked ? 'icon-aixin1' : 'icon-aixin']"></i>
             {{ diary.likeNum }}
           </span>
-          <span class="stat">
+          <span class="stat" @click="navigateToDiary">
             <span class="iconfont icon-pinglun"></span>
             {{ diary.comments || 0 }}
           </span>

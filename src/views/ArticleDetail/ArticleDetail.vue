@@ -84,15 +84,17 @@
       <div class="comment-input-container">
         <img src="/diary.png" alt="用户头像" class="comment-input-avatar" />
         <div class="comment-input-wrapper">
-          <textarea
+          <n-input
             ref="commentTextarea"
-            v-model="newComment"
+            v-model:value="newComment"
             placeholder="写下你的评论..."
             class="comment-textarea"
             rows="3"
             @blur="handleBlur"
-            maxlength="1000"
-          ></textarea>
+            maxlength="300"
+            show-count
+            type="textarea"
+          ></n-input>
           <div class="comment-actions">
             <EmojiMartVue3 @change="handleEmojiChange">
               <div style="font-size: 21px;cursor: pointer;">
@@ -109,7 +111,6 @@
           </div>
         </div>
       </div>
-      
       <!-- 评论列表 -->
       <div class="comments-list">
         <div v-for="comment in comments" :key="comment.id" class="comment-item">
@@ -125,8 +126,32 @@
                 <i class="iconfont icon-aixin"></i>
                 <span>{{ comment.likesCount }}</span>
               </button>
-              <button class="comment-action-button">回复</button>
+              <button class="comment-action-button" @click="toggleReplay(comment)">回复</button>
             </div>
+            <div class="replay-count">
+              查看{{ comment.replayList?.length }}条回复 <DArrowRight style="width: 1em; height: 1em;" />
+            </div>
+            <!-- 二级回复评论 -->
+            <div class="two-level-replay" v-if="comment.replayList?.length > 0">
+              <div class="replay-list" v-for="item in comment.replayList" :key="item.id">
+                <div class="comment-header">
+                  <span class="comment-author">{{ item.nickName }}</span>
+                  <span class="comment-time">{{ formatRelativeTime(item.createdAt) }}</span>
+                </div>
+                <p class="comment-text">{{ item.content }}</p>
+                <div class="comment-actions">
+                  <button class="comment-action-button">
+                    <i class="iconfont icon-aixin"></i>
+                    <span>{{ item.likesCount }}</span>
+                  </button>
+                  <button class="comment-action-button" @click="toggleReplay(item,2)">回复</button>
+                </div>
+              </div>
+            </div>
+            <!-- 底部回复 -->
+             <div class="comment-replay-bottom" v-if="comment.isShowReplay">
+                <ReplayComment :commentForm="commentForm" @submitComment="submitReplayComment" />
+             </div>
           </div>
         </div>
         
@@ -160,8 +185,6 @@
       </div>
     </div> -->
     
-    <!-- 底部装饰 -->
-    <div class="bottom-decoration"></div>
   </div>
 </template>
 
@@ -173,6 +196,7 @@ import { useDiaryStore } from '@/store/diary.js';
 import { getDiaryById,getCommentList,addComment } from '@/api/index.js';
 import EmojiMartVue3 from '@/components/EmojiMartVue3/EmojiMartVue3.vue'
 import defaultAvatar from "@/assets/img/1.jpg"
+import ReplayComment from "../Component/ReplayComment.vue"
 const router = useRouter();
 const route = useRoute();
 const userStore = useUserStore();
@@ -222,8 +246,10 @@ const loadCommentList = async () => {
   let res = await getCommentList({diaryId:diary.id,parentId:commentForm.id || 0});
   if(res.code === 200){
     comments.value = res.data.rows;
+    commentCount.value = res.data.total;
   } else {
     comments.value = [];
+    commentCount.value = 0;
   }
   }
 // 格式化日期
@@ -256,7 +282,6 @@ const formatRelativeTime = (dateString) => {
 };
 // 格式化内容
 const formatContent = (content) => {
-  // 简单的内容格式化，实际项目中可能需要更复杂的处理
   return content
     .replace(/\n/g, '<br/>')
     .replace(/### (.*?)<br\/>/g, '<h3>$1</h3>')
@@ -267,48 +292,62 @@ const formatContent = (content) => {
 const toggleLike = () => {
   isLiked.value = !isLiked.value;
   likeCount.value += isLiked.value ? 1 : -1;
-  // 实际项目中这里应该调用API
 };
 // 分享文章
 const shareArticle = () => {
-  // 实际项目中实现分享功能
   alert('分享功能开发中...');
 };
 // 提交评论
-const submitComment = () => {
-  if (!newComment.value.trim() || !userInfo.value.id) return;
+const submitComment = (level = 1) => {
+  if ((!newComment.value.trim() && level === 1) || !userInfo.value.id) return;
+  console.log(level);
   
   const params = {
     diaryId:diary.id,
-    content: newComment.value.trim(),
+    content:level === 1 ? newComment.value.trim() : commentForm.content,
     targetId:commentForm.targetId,
     parentId:commentForm.id || 0,
     rootId:commentForm.rootId || 0,
+  };
+  const newCommentObj = {
+    id: params.id,
+    userId: userInfo.value.id,
+    avatar: userInfo.value.avatar || defaultAvatar,
+    nickName: userInfo.value.nickname || '匿名用户',
+    targetId: params.targetId,
+    content: params.content,
+    parentId: params.parentId,
+    rootId: params.rootId,
+    status: 1,
+    createdAt: new Date().toISOString(),
   };
   if(params.parentId === 0){
       delete params.targetId;
   };
   addComment(params).then(res=>{
-    console.log(res);
     if(res.code === 200){
-      loadCommentList();
+      newCommentObj.id = res.data;
+      console.log(newCommentObj);
+      if(level === 1){
+        comments.value.unshift(newCommentObj);
+      } else {
+        let index = comments.value.findIndex(c=>c.id === commentForm.rootId);
+        if(index !== -1){
+          comments.value[index].replayList = comments.value[index].replayList || [];
+          comments.value[index].replayList.unshift(newCommentObj);
+        }
+      }
+      
+      commentCount.value++;
+      newComment.value = '';
+      // loadCommentList();
     } else {
       alert(res.msg);
     }
   })
-  // comments.value.unshift(newCommentObj);
-  // commentCount.value++;
-  // newComment.value = '';
-  
-  // 实际项目中这里应该调用API
 };
-// 聚焦评论框
 const focusComment = () => {
   commentTextarea.value?.focus();
-};
-
-const navigateToArticle = (id) => {
-  router.push(`/article-detail/${id}`);
 };
 
 const goBack = () => {
@@ -333,12 +372,33 @@ const handleEmojiChange = (emoji) => {
   // 重新设置焦点和光标位置
   setTimeout(() => {
     commentTextarea.value.focus();
-    commentTextarea.value.selectionStart = cursorIndex.value;
-    commentTextarea.value.selectionEnd = cursorIndex.value;
+    commentTextarea.value.textareaElRef.selectionStart = cursorIndex.value;
+    commentTextarea.value.textareaElRef.selectionEnd = cursorIndex.value;
   }, 0);
 };
 const handleBlur = (e) => {
   cursorIndex.value = e.target.selectionStart;
+};
+const toggleReplay = (comment) => {
+
+  Object.assign(commentForm, comment);
+  commentForm.parentId = comment.id;
+  commentForm.rootId = comment.id || 0;
+  // 关闭其他回复框
+  if(comment.isShowReplay){
+    comments.value.forEach(c => c.isShowReplay = false);
+    return;
+  };
+  comments.value.forEach(c => c.isShowReplay = false);
+  comment.isShowReplay = true;
+};
+// 提交回复评论
+const submitReplayComment = (comment) => {
+  if (!comment.content.trim() || !userInfo.value.id) return;
+  commentForm.targetId = comment.userId;
+  commentForm.content = comment.content;
+  console.log(comment);
+  submitComment(2);
 };
 onBeforeMount(()=>{
 
@@ -654,7 +714,7 @@ onMounted(() => {
         transition: all 0.3s ease;
         
         &:hover:not(:disabled) {
-          background-color: var(--primary-dark);
+          background-color: var(--primary-light);
           transform: translateY(-1px);
         }
         
@@ -670,12 +730,12 @@ onMounted(() => {
     .comment-item {
       display: flex;
       gap: 1rem;
-      margin-bottom: 1.5rem;
-      padding-bottom: 1.5rem;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.5rem;
       border-bottom: 1px solid var(--border-color);
       
       &:last-child {
-        border-bottom: none;
+        // border-bottom: none;
         margin-bottom: 0;
         padding-bottom: 0;
       }
@@ -711,7 +771,7 @@ onMounted(() => {
           font-size: var(--font-size-base);
           line-height: 1.6;
           color: var(--text-medium);
-          margin-bottom: 0.75rem;
+          margin-bottom: 0.5rem;
         }
         
         .comment-actions {
@@ -728,7 +788,9 @@ onMounted(() => {
             color: var(--text-light);
             cursor: pointer;
             padding: 0.25rem 0;
-            
+            i {
+              font-size: 1.2rem;
+            }
             &:hover {
               color: var(--primary-color);
               transform: none;
@@ -833,13 +895,32 @@ onMounted(() => {
   }
 }
 
-.bottom-decoration {
-  height: 2rem;
-}
-
 .comment-actions{
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+.replay-count{
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background-color: var(--primary-light);
+  color: var(--primary-color);
+  padding: 0.25rem 0.75rem;
+  width: max-content;
+  border-radius: 12px;
+  font-weight: 500;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  &:hover{
+    transform: translateX(4px);
+  }
+}
+.comment-replay-bottom{
+  margin-top: 0.75rem;
+}
+.replay-list{
+  margin-top: 0.75rem;
 }
 </style>

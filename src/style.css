@@ -90,7 +90,7 @@ button {
 }
 
 button:hover {
-  background-color: var(--secondary-color);
+  background-color: var(--primary-light);
   transform: translateY(-1px);
 }
 
