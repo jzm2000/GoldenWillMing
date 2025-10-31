@@ -104,7 +104,7 @@
             <button 
               class="submit-comment-button"
               :disabled="!newComment.trim()"
-              @click="submitComment"
+              @click="submitComment(1)"
             >
               发表评论
             </button>
