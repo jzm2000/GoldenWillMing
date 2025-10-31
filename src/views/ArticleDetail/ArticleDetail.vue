@@ -128,23 +128,26 @@
               </button>
               <button class="comment-action-button" @click="toggleReplay(comment)">回复</button>
             </div>
-            <div class="replay-count">
-              查看{{ comment.replayList?.length }}条回复 <DArrowRight style="width: 1em; height: 1em;" />
+            <div class="replay-count" @click="loadMoreReplay(comment)">
+              查看{{ comment.replayNum }}条回复 <DArrowRight style="width: 1em; height: 1em;" />
             </div>
             <!-- 二级回复评论 -->
             <div class="two-level-replay" v-if="comment.replayList?.length > 0">
               <div class="replay-list" v-for="item in comment.replayList" :key="item.id">
-                <div class="comment-header">
-                  <span class="comment-author">{{ item.nickName }}</span>
-                  <span class="comment-time">{{ formatRelativeTime(item.createdAt) }}</span>
-                </div>
-                <p class="comment-text">{{ item.content }}</p>
-                <div class="comment-actions">
-                  <button class="comment-action-button">
-                    <i class="iconfont icon-aixin"></i>
-                    <span>{{ item.likesCount }}</span>
-                  </button>
-                  <button class="comment-action-button" @click="toggleReplay(item,2)">回复</button>
+                <img :src="comment.avatar" alt="评论者头像" class="comment-avatar" />
+                <div class="comment-content-wrapper">
+                  <div class="comment-header">
+                    <span class="comment-author">{{ item.nickName }}</span>
+                    <span class="comment-time">{{ formatRelativeTime(item.createdAt) }}</span>
+                  </div>
+                  <p class="comment-text">{{ item.content }}</p>
+                  <div class="comment-actions">
+                    <button class="comment-action-button">
+                      <i class="iconfont icon-aixin"></i>
+                      <span>{{ item.likesCount }}</span>
+                    </button>
+                    <button class="comment-action-button" @click="toggleReplay(item,2)">回复</button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -335,6 +338,7 @@ const submitComment = (level = 1) => {
         if(index !== -1){
           comments.value[index].replayList = comments.value[index].replayList || [];
           comments.value[index].replayList.unshift(newCommentObj);
+          comments.value[index].replayNum++;
         }
       }
       
@@ -365,6 +369,19 @@ const loadDiaryData = async () => {
   isLiked.value = false;
   isBookmarked.value = false;
 };
+const loadMoreReplay = async (comment) => {
+  if(comment.replayList?.length >= comment.replayCount){
+    return;
+  }
+  let res = await getCommentList({diaryId:diary.id,parentId:comment.id || 0});
+  if(res.code === 200){
+    comment.replayList = res.data.rows;
+    comment.replayCount = res.data.total;
+  } else {
+    comment.replayList = [];
+    comment.replayCount = 0;
+  }
+}
 const handleEmojiChange = (emoji) => {
   newComment.value = newComment.value.slice(0, cursorIndex.value) + emoji + newComment.value.slice(cursorIndex.value);
   // 更新光标位置到插入的emoji后面
@@ -734,11 +751,11 @@ onMounted(() => {
       padding-bottom: 0.5rem;
       border-bottom: 1px solid var(--border-color);
       
-      &:last-child {
-        // border-bottom: none;
-        margin-bottom: 0;
-        padding-bottom: 0;
-      }
+      // &:last-child {
+      //   // border-bottom: none;
+      //   margin-bottom: 0;
+      //   padding-bottom: 0;
+      // }
       
       .comment-avatar {
         width: 40px;
@@ -772,6 +789,7 @@ onMounted(() => {
           line-height: 1.6;
           color: var(--text-medium);
           margin-bottom: 0.5rem;
+          word-break: break-all;
         }
         
         .comment-actions {
@@ -921,6 +939,8 @@ onMounted(() => {
   margin-top: 0.75rem;
 }
 .replay-list{
+  display: flex;
+  column-gap: 1rem;
   margin-top: 0.75rem;
 }
 </style>
