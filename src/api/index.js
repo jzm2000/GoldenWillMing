@@ -30,6 +30,10 @@ export const categoryList = (params) => get("/diary-category/categoryList",param
 export const publicCategoryList = (params) => get("/public/publicCategoryList",params);
 // 日记详情
 export const getDiaryById = (params) => post("/public/detail",params);
+// 新增评论
+export const addComment = (params) => post("/comment/addComment",params);
+// 评论列表
+export const getCommentList = (params) => get("/public/commentlist",params);
 //#endregion 日记模块
 
 //#region 最新消息模块

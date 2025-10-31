@@ -116,14 +116,14 @@
           <img :src="comment.avatar" alt="评论者头像" class="comment-avatar" />
           <div class="comment-content">
             <div class="comment-header">
-              <span class="comment-author">{{ comment.author }}</span>
+              <span class="comment-author">{{ comment.nickName }}</span>
               <span class="comment-time">{{ formatRelativeTime(comment.createdAt) }}</span>
             </div>
             <p class="comment-text">{{ comment.content }}</p>
             <div class="comment-actions">
               <button class="comment-action-button">
                 <i class="iconfont icon-aixin"></i>
-                <span>{{ comment.likes }}</span>
+                <span>{{ comment.likesCount }}</span>
               </button>
               <button class="comment-action-button">回复</button>
             </div>
@@ -166,11 +166,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, onBeforeMount } from 'vue';
+import { ref, onMounted, computed, onBeforeMount, reactive } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useUserStore } from '@/store/user.js';
 import { useDiaryStore } from '@/store/diary.js';
-import { getDiaryById } from '@/api/index.js';
+import { getDiaryById,getCommentList,addComment } from '@/api/index.js';
 import EmojiMartVue3 from '@/components/EmojiMartVue3/EmojiMartVue3.vue'
 import defaultAvatar from "@/assets/img/1.jpg"
 const router = useRouter();
@@ -196,6 +196,15 @@ const diary = ref({
   imageUrl: '',
   categoryName:''
 });
+const commentForm = reactive({
+  "id": "",
+  "userId": '',
+  "targetId": '',
+  "content": "",
+  "parentId": 0,
+  "rootId": 0,
+  "status": "1",
+})
 const likeCount = ref(0);
 const commentCount = ref(0);
 const isLiked = ref(false);
@@ -205,9 +214,18 @@ const comments = ref([]);
 const relatedArticles = ref([]);
 // const defaultAvatar = defaultAvatar;
 let cursorIndex = ref(0);
-// 获取日记ID
 diary.id = route.params.id;
 
+// 获取评论列表
+
+const loadCommentList = async () => {
+  let res = await getCommentList({diaryId:diary.id,parentId:commentForm.id || 0});
+  if(res.code === 200){
+    comments.value = res.data.rows;
+  } else {
+    comments.value = [];
+  }
+  }
 // 格式化日期
 const formatDate = (dateString) => {
   if (!dateString) return '';
@@ -258,20 +276,29 @@ const shareArticle = () => {
 };
 // 提交评论
 const submitComment = () => {
-  if (!newComment.value.trim()) return;
+  if (!newComment.value.trim() || !userInfo.value.id) return;
   
-  const newCommentObj = {
-    id: Date.now(),
-    author: '当前用户',
-    avatar: defaultAvatar,
+  const params = {
+    diaryId:diary.id,
     content: newComment.value.trim(),
-    createdAt: new Date().toISOString(),
-    likes: 0
+    targetId:commentForm.targetId,
+    parentId:commentForm.id || 0,
+    rootId:commentForm.rootId || 0,
   };
-  
-  comments.value.unshift(newCommentObj);
-  commentCount.value++;
-  newComment.value = '';
+  if(params.parentId === 0){
+      delete params.targetId;
+  };
+  addComment(params).then(res=>{
+    console.log(res);
+    if(res.code === 200){
+      loadCommentList();
+    } else {
+      alert(res.msg);
+    }
+  })
+  // comments.value.unshift(newCommentObj);
+  // commentCount.value++;
+  // newComment.value = '';
   
   // 实际项目中这里应该调用API
 };
@@ -279,73 +306,25 @@ const submitComment = () => {
 const focusComment = () => {
   commentTextarea.value?.focus();
 };
-// 导航到其他文章
+
 const navigateToArticle = (id) => {
   router.push(`/article-detail/${id}`);
 };
-// 返回上一页
+
 const goBack = () => {
   router.back();
 };
-// 模拟加载数据
+
 const loadDiaryData = async () => {
    let res = await getDiaryById({id:diary.id});
   if(res.code === 200){
     // diary.value = res.data;
     console.log(res);
     Object.assign(diary.value, res.data);
-  }
+  };
   
   isLiked.value = false;
   isBookmarked.value = false;
-  
-  // 模拟评论数据
-  comments.value = [
-    {
-      id: 1,
-      author: '小花',
-      avatar: '/diary.png',
-      content: '写得真好，我也很喜欢春天的气息！',
-      createdAt: '2023-04-16T09:15:00.000Z',
-      likes: 5
-    },
-    {
-      id: 2,
-      author: '大树',
-      avatar: '/diary.png',
-      content: '那个街角的咖啡馆我也去过，他们家的手冲确实不错！',
-      createdAt: '2023-04-16T14:30:00.000Z',
-      likes: 3
-    }
-  ];
-  
-  // 模拟相关推荐数据
-  relatedArticles.value = [
-    {
-      id: 2,
-      title: '夏日午后的一场大雨',
-      author: '小雨',
-      imageUrl: '/diary.png',
-      createdAt: '2023-06-10T15:20:00.000Z',
-      views: 128
-    },
-    {
-      id: 3,
-      title: '秋天的落叶',
-      author: '秋风',
-      imageUrl: '/diary.png',
-      createdAt: '2023-10-25T09:45:00.000Z',
-      views: 95
-    },
-    {
-      id: 4,
-      title: '冬日里的一杯热茶',
-      author: '暖阳',
-      imageUrl: '/diary.png',
-      createdAt: '2023-12-20T18:30:00.000Z',
-      views: 210
-    }
-  ];
 };
 const handleEmojiChange = (emoji) => {
   newComment.value = newComment.value.slice(0, cursorIndex.value) + emoji + newComment.value.slice(cursorIndex.value);
@@ -367,6 +346,7 @@ onBeforeMount(()=>{
 // 组件挂载时加载数据
 onMounted(() => {
   loadDiaryData();
+  loadCommentList();
 });
 </script>
 
