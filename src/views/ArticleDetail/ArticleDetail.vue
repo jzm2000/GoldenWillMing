@@ -126,7 +126,10 @@
                 <i class="iconfont icon-aixin"></i>
                 <span>{{ comment.likesCount }}</span>
               </button>
-              <button class="comment-action-button" @click="toggleReplay(comment,1)">回复</button>
+              <button class="comment-action-button" @click="toggleReplay(comment,1)">
+                <i style="padding-top: 2px;" class="iconfont icon-pinglun"></i>
+                回复
+              </button>
             </div>
             <div class="replay-count" @click="loadMoreReplay(comment)">
               查看{{ comment.replayNum }}条回复 <ArrowRight :class="['replay-arrow-icon',{ 'is-Spread': comment.isSpread }]" />

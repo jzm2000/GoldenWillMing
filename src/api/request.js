@@ -38,6 +38,7 @@ instance.interceptors.request.use(function (config) {
     if(userStore.token){
         config.headers.Authorization = 'Bearer ' +  userStore.token;
     };
+    config.headers['X-Web-Type'] = 'PC';
     return config;
   }, function (error) {
 
