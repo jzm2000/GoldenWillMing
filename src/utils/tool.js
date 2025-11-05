@@ -20,4 +20,15 @@ function getRadius(e) {
         y,
     };
 };
-export { getRadius };
+function _throttle(fn,delay){
+    let time = null
+    return function (){
+        if(time) return;
+        const args = arguments;
+        time = setTimeout(()=>{
+            time = null;
+            fn.apply(this,args);
+        },1000);
+    }
+}
+export { getRadius,_throttle };

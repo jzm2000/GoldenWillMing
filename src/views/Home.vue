@@ -50,7 +50,7 @@
           </div>
           <div class="right-diary_list">
             <div class="diary-title">精选日记</div>
-            <div class="diary-content">
+            <div class="diary-content" v-loading="isLoading">
               <div class="diary-list" v-for="(item) in diaryList" :key="item.id">
                 <div class="diary-item">
                   <div class="diary-item-header">
@@ -126,7 +126,8 @@ import useCssVariables from '@/utils/useCssVariables';
 import avatar from "@/assets/img/1.jpg";
 import { useUserStore } from '@/store/user.js';
 import { useMessage } from "naive-ui";
-import GInput from '@/components/GoldUI/g-input/input.vue'
+import GInput from '@/components/GoldUI/g-input/input.vue';
+import { _throttle } from "@/utils/tool.js";
 const message = useMessage();
 
 const userStore = useUserStore();
@@ -160,20 +161,29 @@ const userInfo = reactive({
   likeNum: 0,
   diaryNum:0,
 });
-
-// 逻辑业务的函数
+let isLoading = ref(false);
+let total = ref(0);
 // 公开日记列表初始化
 function initData(){
+  isLoading.value = true;
   getPublicDiaryList({
     userId:userStore.userInfo.id,
     ...queryParams,
     title:searchQuery.value,
   }).then(res=>{
     if(res.code === 200){
-      diaryList.value = res.data.rows || [];
+      if(queryParams.pageNum === 1){
+        diaryList.value = res.data.rows || [];
+      }else {
+        diaryList.value = [...diaryList.value,...res.data.rows || []];
+      };
+      total.value = res.data.total || 0;
     }else {
       message.error(res.msg);
-    }
+    };
+    setTimeout(()=>{
+      isLoading.value = false;
+    },3000)
   })
 }
 // 点赞日记
@@ -230,17 +240,11 @@ function subscribeNewsletter(){
   message.info('正在开发中。。。');
 }
 
-
-
-// 函数执行
 onBeforeMount(async ()=>{
   await getUserInfoHandle();
   initData();
 })
 
-
-
-//逻辑业务的函数
 // 格式化日期
 const formatDate = (dateString) => {
   const date = new Date(dateString)
@@ -291,13 +295,30 @@ const simulateTyping = (text, element,status = 1,delay = 100) => {
     }
   }, delay);
 };
+// 触底加载
+const loadDiaryMore = () => {
+  // 可滚动长度减去footer的高度和订阅更新的高度和精选日记的padding-bottom
+  if(window.scrollY > document.documentElement.scrollHeight - document.documentElement.clientHeight - 300 - 360 - 96 - 16){
+    if(isLoading.value) return;
+    if(diaryList.value.length >= total.value){
+      console.log('没有更多日记了');
+      return;
+    }else {
+      queryParams.pageNum++;
+      initData();
+    }
+  }
+};
 onMounted(()=>{
-  simulateTyping(textList[textIndex], heroText.value)
+  simulateTyping(textList[textIndex], heroText.value);
+  window.addEventListener('scroll',_throttle(loadDiaryMore,1000));
 });
 onUnmounted(()=>{
+  // 移除滚动事件监听
+  window.removeEventListener('scroll',_throttle(loadDiaryMore,1000));
   clearInterval(interval);
   clearTimeout(timeout);
-  })
+});
 </script>
 
 <style scoped lang="scss">
@@ -614,10 +635,16 @@ onUnmounted(()=>{
 
 /* Newsletter Section */
 .newsletter {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   background: linear-gradient(135deg, var(--primary-light) 0%, var(--accent-color) 100%);
   color: white;
-  padding: 5rem 0;
+  height: 300px;
   text-align: center;
+  .container{
+    width: 100%;
+  }
 }
 
 .newsletter-content {

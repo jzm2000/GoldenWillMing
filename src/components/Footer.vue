@@ -39,14 +39,19 @@
 
 <style scoped lang="scss">
 .footer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   background-color: #35495e;
   color: white;
-  padding: 3rem 0 1.5rem;
+  height: 360px;
+  // padding: 3rem 0 1.5rem;
   /* margin-top: 3rem; */
 }
 
 .container {
   max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
   padding: 0 2rem;
 }
