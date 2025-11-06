@@ -38,8 +38,8 @@ export const useCheckVersion = () => {
     onMounted(()=>{
         localStorage.removeItem("version");
         checkVersion();
-        // 每5秒检查一次版本号
-        setInterval(checkVersion,5000);
+        // 每1分钟检查一次版本号
+        setInterval(checkVersion,1000 * 60);
     });
     return {
         needRefresh,
