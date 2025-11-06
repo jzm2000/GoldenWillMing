@@ -1,11 +1,22 @@
 <script setup>
 import { zhCN, dateZhCN } from 'naive-ui'
 import {useRoute} from 'vue-router';
+import {useCheckVersion} from "./hooks/useCheckVersion.js";
+import { onMounted } from "vue";
 const route = useRoute();
 const zhCNConfig = {
   ...zhCN,
   date: dateZhCN
 }
+const { needRefresh, refreshPage } = useCheckVersion();
+
+onMounted(()=>{
+    if(needRefresh.value){
+        if(confirm("发现新版本，是否刷新页面？")){
+            refreshPage();
+        }
+    }
+})
 
 window.addEventListener("click", function (e) {
   let r = 50;
