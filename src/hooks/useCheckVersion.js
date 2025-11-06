@@ -13,7 +13,7 @@ export const useCheckVersion = () => {
     const checkVersion = ()=>{
         try {
             if(!import.meta.env.PROD) return;
-            fetch('/version.json')
+            fetch('/version.json'+'?t='+Date.now())
             .then(res=>res.json())
             .then(data=>{
                 console.log('当前版本号:', data.version,'本地版本号:', getLocalVersion());
