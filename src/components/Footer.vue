@@ -1,5 +1,5 @@
 <template>
-  <footer class="footer">
+  <footer class="footer" id="footer">
     <div class="container">
       <div class="footer-content">
         <div class="footer-logo">
@@ -44,9 +44,7 @@
   justify-content: center;
   background-color: #35495e;
   color: white;
-  height: 360px;
-  // padding: 3rem 0 1.5rem;
-  /* margin-top: 3rem; */
+  padding: 3rem 0 1.5rem;
 }
 
 .container {

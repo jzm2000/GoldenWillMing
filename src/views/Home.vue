@@ -181,9 +181,7 @@ function initData(){
     }else {
       message.error(res.msg);
     };
-    setTimeout(()=>{
-      isLoading.value = false;
-    },3000)
+    isLoading.value = false;
   })
 }
 // 点赞日记
@@ -297,8 +295,9 @@ const simulateTyping = (text, element,status = 1,delay = 100) => {
 };
 // 触底加载
 const loadDiaryMore = () => {
+  let fHeight = document.querySelector('#footer').offsetHeight;
   // 可滚动长度减去footer的高度和订阅更新的高度和精选日记的padding-bottom
-  if(window.scrollY > document.documentElement.scrollHeight - document.documentElement.clientHeight - 300 - 360 - 96 - 16){
+  if(window.scrollY > document.documentElement.scrollHeight - document.documentElement.clientHeight - 300 - fHeight - 96 - 16){
     if(isLoading.value) return;
     if(diaryList.value.length >= total.value){
       console.log('没有更多日记了');
