@@ -1,13 +1,13 @@
 import { ref, onMounted } from "vue";
-
 export const useCheckVersion = () => {
     let needRefresh = ref(false);
+    let version = ref();
     const getLocalVersion = () =>{
         return localStorage.getItem("version") || '';
     };
 
-    const setLocalVersion = (newVersion) =>{
-        localStorage.setItem("version", newVersion);
+    const setLocalVersion = () =>{
+        localStorage.setItem("version", version.value);
     };
 
     const checkVersion = ()=>{
@@ -16,10 +16,15 @@ export const useCheckVersion = () => {
             fetch('/version.json')
             .then(res=>res.json())
             .then(data=>{
-                console.log('当前版本号:', data,'本地版本号:', getLocalVersion());
+                console.log('当前版本号:', data.version,'本地版本号:', getLocalVersion());
                 if(String(data.version) !== getLocalVersion()){
-                    needRefresh.value = true;
-                    setLocalVersion(data.version);
+                    version.value = data.version;
+                    if(!getLocalVersion()){
+                        setLocalVersion();
+                        needRefresh.value = false;
+                    } else {
+                        needRefresh.value = true;
+                    }
                 }
             })
         } catch (error) {
@@ -31,12 +36,14 @@ export const useCheckVersion = () => {
         window.location.reload(true);
     }
     onMounted(()=>{
+        localStorage.removeItem("version");
         checkVersion();
         // 每5秒检查一次版本号
         setInterval(checkVersion,5000);
     });
     return {
         needRefresh,
-        refreshPage
+        refreshPage,
+        setLocalVersion
     }
 }

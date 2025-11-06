@@ -8,7 +8,7 @@ const zhCNConfig = {
   ...zhCN,
   date: dateZhCN
 }
-const { needRefresh, refreshPage } = useCheckVersion();
+const { needRefresh, refreshPage,setLocalVersion } = useCheckVersion();
 // 用户自己确认是否刷新页面
 let isSign = ref(true);
 
@@ -18,6 +18,7 @@ onMounted(()=>{
       if(needRefresh.value && isSign.value){
           isSign.value = confirm("发现新版本，是否刷新页面？");
           if(isSign.value){
+              setLocalVersion();
               refreshPage();
           }
       }

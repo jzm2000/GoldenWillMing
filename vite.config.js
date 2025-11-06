@@ -99,8 +99,9 @@ export default defineConfig({
           }
           return `assets/${extType}/[name]-[hash][extname]`;
         },
-        chunkFileNames: 'assets/js/[name]-[hash].js',
-        entryFileNames: 'assets/js/[name]-[hash].js',
+        // 自定义chunk文件名格式
+        chunkFileNames: `assets/js/[name]-[hash]${Date.now()}.js`,
+        entryFileNames: `assets/js/[name]-[hash]${Date.now()}.js`,
         manualChunks: {
           vendor: ['vue', 'vue-router', 'pinia']
         },
