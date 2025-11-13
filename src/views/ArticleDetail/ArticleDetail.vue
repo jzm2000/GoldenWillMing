@@ -388,19 +388,32 @@ const handleBlur = (e) => {
   cursorIndex.value = e.target.selectionStart;
 };
 const toggleReplay = (comment,level = 1,parentComment = null) => {
-
-  Object.assign(commentForm, comment);
-  commentForm.parentId = comment.id;
-  commentForm.rootId = comment.id || 0;
+  if(level === 1){
+    Object.assign(commentForm, comment);
+    commentForm.parentId = comment.id;
+    commentForm.rootId = comment.id || 0;
+    // 关闭其他回复框
+    if(comment.isShowReplay){
+      comments.value.forEach(c => c.isShowReplay = false);
+      return;
+    };
+    comments.value.forEach(c => c.isShowReplay = false);
+    comment.isShowReplay = true;
+  } else if(level === 2){
+    Object.assign(commentForm,comment);
+    commentForm.parentId = parentComment.id;
+    commentForm.rootId = parentComment.id || 0;
+    // 关闭其他回复框
+    if(parentComment.isShowReplay){
+      comments.value.forEach(c => c.isShowReplay = false);
+      return;
+    };
+    comments.value.forEach(c => c.isShowReplay = false);
+    parentComment.isShowReplay = true;
+  }
   console.log(comment,parentComment);
   
-  // 关闭其他回复框
-  if(comment.isShowReplay){
-    comments.value.forEach(c => c.isShowReplay = false);
-    return;
-  };
-  comments.value.forEach(c => c.isShowReplay = false);
-  comment.isShowReplay = true;
+
 };
 // 提交回复评论
 const submitReplayComment = (comment) => {
