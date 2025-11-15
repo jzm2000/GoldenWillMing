@@ -16,7 +16,7 @@
         <div class="article-meta">
           <div class="author-info">
             <img
-              :src="userInfo.avatar || defaultAvatar" 
+              :src="diary.avatar || defaultAvatar" 
               alt="作者头像" 
               class="author-avatar"
             />
@@ -205,7 +205,8 @@ const diary = reactive({
   category: '',
   tags: [],
   imageUrl: '',
-  categoryName:''
+  categoryName:'',
+  avatar:''
 });
 const commentForm = reactive({
   "id": "",
