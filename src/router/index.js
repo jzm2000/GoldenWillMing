@@ -42,6 +42,11 @@ const routes = [
         path: '/profile-edit',
         name: "ProfileEdit",
         component: () => import("@/views/Profile/ProfileEdit.vue"),
+      },
+      {
+        path: '/test',
+        name: "Test",
+        component: () => import("@/views/test.vue"),
       }
     ],
   },
