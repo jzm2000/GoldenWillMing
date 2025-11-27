@@ -53,9 +53,9 @@ button.small-btn{
 }
 @font-face {
   font-family: "iconfont"; /* Project id 5023305 */
-  src: url('//at.alicdn.com/t/c/font_5023305_gq0trvu6liu.woff2?t=1759311187689') format('woff2'),
-       url('//at.alicdn.com/t/c/font_5023305_gq0trvu6liu.woff?t=1759311187689') format('woff'),
-       url('//at.alicdn.com/t/c/font_5023305_gq0trvu6liu.ttf?t=1759311187689') format('truetype');
+  src: url('//at.alicdn.com/t/c/font_5023305_xdonk3u2j5a.woff2?t=1762313101830') format('woff2'),
+       url('//at.alicdn.com/t/c/font_5023305_xdonk3u2j5a.woff?t=1762313101830') format('woff'),
+       url('//at.alicdn.com/t/c/font_5023305_xdonk3u2j5a.ttf?t=1762313101830') format('truetype');
 }
 
 .iconfont {
@@ -64,6 +64,26 @@ button.small-btn{
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-loading:before {
+  content: "\e62c";
+}
+
+.icon-loading1:before {
+  content: "\e644";
+}
+
+.icon-riji:before {
+  content: "\e600";
+}
+
+.icon-wode:before {
+  content: "\e601";
+}
+
+.icon-shouye:before {
+  content: "\e602";
 }
 
 .icon-bianji:before {
@@ -97,9 +117,8 @@ button.small-btn{
 .icon-aixin:before {
   content: "\e83f";
 }
+
 .icon-aixin1:before {
   content: "\e85c";
   color: red;
 }
-
-

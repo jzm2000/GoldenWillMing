@@ -19,7 +19,7 @@
 
     <div class="bg_cover">
       <section class="featured">
-        <div class="container">
+        <div class="container feature-diary-content">
           <div class="left-user_info">
             <div class="user-info">
               <div class="user-avatar">
@@ -50,8 +50,8 @@
           </div>
           <div class="right-diary_list">
             <div class="diary-title">精选日记</div>
-            <div class="diary-content">
-              <div class="diary-list" v-for="(item) in diaryList" :key="item.id">
+            <ul class="diary-content">
+              <li class="diary-list" v-for="(item) in diaryList" :key="item.id">
                 <div class="diary-item">
                   <div class="diary-item-header">
                     <div class="diary-item-avatar">
@@ -85,7 +85,8 @@
                   <!-- 评论区 -->
                    
                 </div>
-              </div>
+              </li>
+              <div class="load-more" v-loading="isLoading"></div>
               <div class="not_diary" v-if="diaryList.length===0">
                 <div class="empty-icon">
                   📓
@@ -94,7 +95,7 @@
                 <div class="empty-subtitle">还没有任何日记内容，来写第一篇吧！</div>
                 <button class="empty-button" @click="toWriteDiary">去写日记</button>
               </div>
-            </div>
+            </ul>
           </div>
         </div>
       </section>
@@ -119,14 +120,15 @@
 
 <script setup lang="jsx">
 import Navbar from '@/components/Navbar.vue'
-import { ref,reactive,onMounted,onUnmounted,onBeforeMount } from 'vue'
+import { ref,reactive,onMounted,onUnmounted,onBeforeMount,nextTick } from 'vue'
 import { getUserInfo,getPublicDiaryList,likeDiary } from "@/api/index.js";
 import { useArticleStore } from '../store/article'
 import useCssVariables from '@/utils/useCssVariables';
 import avatar from "@/assets/img/1.jpg";
 import { useUserStore } from '@/store/user.js';
 import { useMessage } from "naive-ui";
-import GInput from '@/components/GoldUI/g-input/input.vue'
+import GInput from '@/components/GoldUI/g-input/input.vue';
+import { _throttle } from "@/utils/tool.js";
 const message = useMessage();
 
 const userStore = useUserStore();
@@ -160,20 +162,36 @@ const userInfo = reactive({
   likeNum: 0,
   diaryNum:0,
 });
+let isLoading = ref(false);
+let total = ref(0);
 
-// 逻辑业务的函数
+const intersectionObserver = {
+   featureDiary:null,
+   diaryList:null
+};
 // 公开日记列表初始化
 function initData(){
+  isLoading.value = true;
   getPublicDiaryList({
     userId:userStore.userInfo.id,
     ...queryParams,
     title:searchQuery.value,
-  }).then(res=>{
+  }).then(async res=>{
     if(res.code === 200){
-      diaryList.value = res.data.rows || [];
+      if(queryParams.pageNum === 1){
+        diaryList.value = res.data.rows || [];
+      }else {
+        diaryList.value = [...diaryList.value,...res.data.rows || []];
+      };
+      await nextTick()
+      let arr = document.querySelectorAll(".diary-list");
+      intersectionObserverHandle(arr);
+      total.value = res.data.total || 0;
     }else {
       message.error(res.msg);
-    }
+    };
+    
+    isLoading.value = false;
   })
 }
 // 点赞日记
@@ -230,17 +248,11 @@ function subscribeNewsletter(){
   message.info('正在开发中。。。');
 }
 
-
-
-// 函数执行
 onBeforeMount(async ()=>{
   await getUserInfoHandle();
   initData();
 })
 
-
-
-//逻辑业务的函数
 // 格式化日期
 const formatDate = (dateString) => {
   const date = new Date(dateString)
@@ -291,13 +303,58 @@ const simulateTyping = (text, element,status = 1,delay = 100) => {
     }
   }, delay);
 };
+// 触底加载
+const loadDiaryMore = () => {
+  let fHeight = document.querySelector('#footer').offsetHeight;
+  // 可滚动长度减去footer的高度和订阅更新的高度和精选日记的padding-bottom
+  if(window.scrollY > document.documentElement.scrollHeight - document.documentElement.clientHeight - 300 - fHeight - 96 - 16){
+    if(isLoading.value) return;
+    if(diaryList.value.length >= total.value){
+      console.log('没有更多日记了');
+      return;
+    }else {
+      queryParams.pageNum++;
+      initData();
+    }
+  }
+};
+const intersectionObserverHandle = (arr) => {
+  intersectionObserver.diaryList = new IntersectionObserver((entries) => {
+    entries.forEach(item=>{
+      if (item.intersectionRatio <= 0) return;
+      item.target.style.opacity = 1;
+      item.target.style.transform = 'translateX(0)';
+      intersectionObserver.diaryList.unobserve(item.target);
+    })
+  },{ threshold: 0.2 });
+  arr.forEach(item=>{
+    intersectionObserver.diaryList.observe(item);
+  });
+};
 onMounted(()=>{
-  simulateTyping(textList[textIndex], heroText.value)
+  simulateTyping(textList[textIndex], heroText.value);
+  window.addEventListener('scroll',(loadDiaryMore));
+
+  intersectionObserver.featureDiary = new IntersectionObserver((entries) => {
+    if (entries[0].intersectionRatio <= 0) return;
+    Array.from(entries[0].target.children).forEach(item=>{
+      item.style.opacity = 1;
+      item.style.transform = 'translateX(0)';
+    });
+  },{ threshold: 0.1 });
+  intersectionObserver.featureDiary.observe(document.querySelector(".left-user_info"));
+
+
 });
 onUnmounted(()=>{
+  // 移除滚动事件监听
+  window.removeEventListener('scroll',(loadDiaryMore));
   clearInterval(interval);
   clearTimeout(timeout);
-  })
+  intersectionObserver.diaryList.disconnect();
+  intersectionObserver.featureDiary.disconnect();
+
+});
 </script>
 
 <style scoped lang="scss">
@@ -570,6 +627,21 @@ onUnmounted(()=>{
         }
       }
     }
+    .user-info{
+      opacity: 0;
+      transform: translateX(-50px);
+      transition: all 0.5s ease;
+    }
+    .search-box{
+      opacity: 0;
+      transform: translateX(-100px);
+      transition: all 0.5s ease;
+    }
+    .date-picker{
+      opacity: 0;
+      transform: translateX(-150px);
+      transition: all 0.5s ease;
+    }
   }
   .right-diary_list{
     flex: 1;
@@ -614,10 +686,16 @@ onUnmounted(()=>{
 
 /* Newsletter Section */
 .newsletter {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   background: linear-gradient(135deg, var(--primary-light) 0%, var(--accent-color) 100%);
   color: white;
-  padding: 5rem 0;
+  height: 300px;
   text-align: center;
+  .container{
+    width: 100%;
+  }
 }
 
 .newsletter-content {
@@ -770,8 +848,17 @@ onUnmounted(()=>{
   flex-direction: column;
   gap: 2rem;
   margin-bottom: 1rem;
+  opacity: 0;
+  transform: translateX(20px);
+  transition: all 0.5s ease;
 }
-
+.diary-content > .diary-list:last-of-type {
+  margin-bottom: 0;
+  .diary-item{
+    border-bottom-left-radius: 0rem;
+    border-bottom-right-radius: 0rem;
+  }
+}
 .diary-item {
   background-color: var(--card-bg);
   border-radius: 0.75rem;
@@ -960,6 +1047,10 @@ onUnmounted(()=>{
   margin-top: 1rem;
   background-color: var(--card-bg);
   border-radius: 0.75rem;
+}
+.load-more{
+  height: 80px;
+  width: 100%;
 }
 
 @media (max-width: 768px) {

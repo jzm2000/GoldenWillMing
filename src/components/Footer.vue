@@ -1,5 +1,5 @@
 <template>
-  <footer class="footer">
+  <footer class="footer" id="footer">
     <div class="container">
       <div class="footer-content">
         <div class="footer-logo">
@@ -39,14 +39,17 @@
 
 <style scoped lang="scss">
 .footer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   background-color: #35495e;
   color: white;
   padding: 3rem 0 1.5rem;
-  /* margin-top: 3rem; */
 }
 
 .container {
   max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
   padding: 0 2rem;
 }

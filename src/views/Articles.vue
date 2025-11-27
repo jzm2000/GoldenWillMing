@@ -156,7 +156,7 @@
 import { ref, onMounted, reactive,computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useArticleStore } from '@/store/article'
-
+import { useUserStore } from "@/store/user"
 import { getDiaryList,getPublicDiaryList,publicCategoryList,categoryList,getRecentNews } from "@/api/index.js"
 
 import DiaryCard from '@/components/DiaryCard.vue'
@@ -166,7 +166,7 @@ import Pagination from '@/components/Pagination.vue'
 
 const router = useRouter()
 const articleStore = useArticleStore()
-
+const userStore = useUserStore()
 // 状态管理
 const searchForm = reactive({
   searchQuery:'',
@@ -258,7 +258,8 @@ const initData = (isSearch = false) =>{
   getPublicDiaryList({
     ...queryParams,
     categoryId:searchForm.activeCategory || undefined,
-    title:searchForm.searchQuery
+    title:searchForm.searchQuery,
+    userId:userStore.userInfo.id
   }).then(res=>{
     if(res.code==200){
       diaries.value = res.data.rows;

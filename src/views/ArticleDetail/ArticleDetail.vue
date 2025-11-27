@@ -16,7 +16,7 @@
         <div class="article-meta">
           <div class="author-info">
             <img
-              :src="userInfo.avatar || defaultAvatar" 
+              :src="diary.avatar || defaultAvatar" 
               alt="作者头像" 
               class="author-avatar"
             />
@@ -54,7 +54,7 @@
           @click="toggleLike"
         >
           <i :class="['iconfont', isLiked ? 'icon-aixin1' : 'icon-aixin']"></i>
-          <span>{{ likeCount }}</span>
+          <span>{{ likeNum }}</span>
         </button>
         
         <button 
@@ -126,13 +126,16 @@
                 <i class="iconfont icon-aixin"></i>
                 <span>{{ comment.likesCount }}</span>
               </button>
-              <button class="comment-action-button" @click="toggleReplay(comment)">回复</button>
+              <button class="comment-action-button" @click="toggleReplay(comment,1)">
+                <i style="padding-top: 2px;" class="iconfont icon-pinglun"></i>
+                回复
+              </button>
             </div>
             <div class="replay-count" @click="loadMoreReplay(comment)">
-              查看{{ comment.replayNum }}条回复 <DArrowRight style="width: 1em; height: 1em;" />
+              查看{{ comment.replayNum }}条回复 <ArrowRight :class="['replay-arrow-icon',{ 'is-Spread': comment.isSpread }]" />
             </div>
             <!-- 二级回复评论 -->
-            <div class="two-level-replay" v-if="comment.replayList?.length > 0">
+            <div class="two-level-replay" v-show="comment.isSpread">
               <div class="replay-list" v-for="item in comment.replayList" :key="item.id">
                 <img :src="comment.avatar" alt="评论者头像" class="comment-avatar" />
                 <div class="comment-content-wrapper">
@@ -141,12 +144,12 @@
                     <span class="comment-time">{{ formatRelativeTime(item.createdAt) }}</span>
                   </div>
                   <p class="comment-text">{{ item.content }}</p>
-                  <div class="comment-actions">
+                  <div class="comment-actions" style="justify-content: flex-start;">
                     <button class="comment-action-button">
                       <i class="iconfont icon-aixin"></i>
                       <span>{{ item.likesCount }}</span>
                     </button>
-                    <button class="comment-action-button" @click="toggleReplay(item,2)">回复</button>
+                    <div class="comment-action-button" @click="toggleReplay(item,2,comment)"><i style="padding-top: 2px;" class="iconfont icon-pinglun"></i>回复</div>
                   </div>
                 </div>
               </div>
@@ -166,28 +169,6 @@
       </div>
     </div>
     
-    <!-- 相关推荐 -->
-    <!-- <div class="related-articles-section">
-      <h3 class="related-articles-title">
-        <i class="iconfont icon-tuijian"></i>
-        相关推荐
-      </h3>
-      
-      <div class="related-articles-list">
-        <div v-for="article in relatedArticles" :key="article.id" class="related-article-item" @click="navigateToArticle(article.id)">
-          <img src="@/assets/img/banner2.png" alt="相关日记封面" class="related-article-cover" />
-          <div class="related-article-info">
-            <h4 class="related-article-title">{{ article.title }}</h4>
-            <div class="related-article-meta">
-              <span>{{ article.author }}</span>
-              <span>{{ formatDate(article.createdAt) }}</span>
-              <span><i class="iconfont icon-yanjing_xianshi_o"></i> {{ article.views }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div> -->
-    
   </div>
 </template>
 
@@ -196,14 +177,16 @@ import { ref, onMounted, computed, onBeforeMount, reactive } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useUserStore } from '@/store/user.js';
 import { useDiaryStore } from '@/store/diary.js';
-import { getDiaryById,getCommentList,addComment } from '@/api/index.js';
+import { getDiaryById,getCommentList,addComment,likeDiary } from '@/api/index.js';
 import EmojiMartVue3 from '@/components/EmojiMartVue3/EmojiMartVue3.vue'
 import defaultAvatar from "@/assets/img/1.jpg"
 import ReplayComment from "../Component/ReplayComment.vue"
+import { useMessage } from 'naive-ui';
 const router = useRouter();
 const route = useRoute();
 const userStore = useUserStore();
 const diaryStore = useDiaryStore();
+const message = useMessage();
 
 const userInfo = computed(() => userStore.getUserInfo);
 
@@ -211,9 +194,10 @@ const userInfo = computed(() => userStore.getUserInfo);
 const commentTextarea = ref(null);
 
 // 日记详情
-const diary = ref({
+const diary = reactive({
   id:"",
   title: '',
+  authorId:'',
   authorName: '',
   imageUrl: '',
   content: '',
@@ -221,7 +205,8 @@ const diary = ref({
   category: '',
   tags: [],
   imageUrl: '',
-  categoryName:''
+  categoryName:'',
+  avatar:''
 });
 const commentForm = reactive({
   "id": "",
@@ -232,7 +217,7 @@ const commentForm = reactive({
   "rootId": 0,
   "status": "1",
 })
-const likeCount = ref(0);
+const likeNum = ref(0);
 const commentCount = ref(0);
 const isLiked = ref(false);
 const isBookmarked = ref(false);
@@ -293,8 +278,19 @@ const formatContent = (content) => {
 };
 // 切换点赞状态
 const toggleLike = () => {
-  isLiked.value = !isLiked.value;
-  likeCount.value += isLiked.value ? 1 : -1;
+  likeDiary({
+    id:diary.id,
+    userId:userInfo.value.id,
+    authorId:diary.authorId,
+    action:isLiked.value ? 'unlike' : 'like'
+  }).then(res=>{
+    if(res.code==200){
+        isLiked.value = !isLiked.value;
+        likeNum.value += isLiked.value ? 1 : -1;
+    } else {
+      message.error(res.msg);
+    }
+  })
 };
 // 分享文章
 const shareArticle = () => {
@@ -303,7 +299,6 @@ const shareArticle = () => {
 // 提交评论
 const submitComment = (level = 1) => {
   if ((!newComment.value.trim() && level === 1) || !userInfo.value.id) return;
-  console.log(level);
   
   const params = {
     diaryId:diary.id,
@@ -319,6 +314,7 @@ const submitComment = (level = 1) => {
     nickName: userInfo.value.nickname || '匿名用户',
     targetId: params.targetId,
     content: params.content,
+    replayNum:0,
     parentId: params.parentId,
     rootId: params.rootId,
     status: 1,
@@ -330,7 +326,6 @@ const submitComment = (level = 1) => {
   addComment(params).then(res=>{
     if(res.code === 200){
       newCommentObj.id = res.data;
-      console.log(newCommentObj);
       if(level === 1){
         comments.value.unshift(newCommentObj);
       } else {
@@ -359,20 +354,17 @@ const goBack = () => {
 };
 
 const loadDiaryData = async () => {
-   let res = await getDiaryById({id:diary.id});
+   let res = await getDiaryById({id:diary.id,userId:userInfo.value.id});
   if(res.code === 200){
-    // diary.value = res.data;
-    console.log(res);
-    Object.assign(diary.value, res.data);
+    Object.assign(diary, res.data);
+    isLiked.value = res.data.isLiked === 1;
   };
-  
-  isLiked.value = false;
+  likeNum.value = res.data.likeNum || 0;
   isBookmarked.value = false;
 };
 const loadMoreReplay = async (comment) => {
-  if(comment.replayList?.length >= comment.replayCount){
-    return;
-  }
+  comment.isSpread = !comment.isSpread;
+  console.log(comment.isSpread);
   let res = await getCommentList({diaryId:diary.id,parentId:comment.id || 0});
   if(res.code === 200){
     comment.replayList = res.data.rows;
@@ -396,25 +388,39 @@ const handleEmojiChange = (emoji) => {
 const handleBlur = (e) => {
   cursorIndex.value = e.target.selectionStart;
 };
-const toggleReplay = (comment) => {
-
-  Object.assign(commentForm, comment);
-  commentForm.parentId = comment.id;
-  commentForm.rootId = comment.id || 0;
-  // 关闭其他回复框
-  if(comment.isShowReplay){
+const toggleReplay = (comment,level = 1,parentComment = null) => {
+  if(level === 1){
+    Object.assign(commentForm, comment);
+    commentForm.parentId = comment.id;
+    commentForm.rootId = comment.id || 0;
+    // 关闭其他回复框
+    if(comment.isShowReplay){
+      comments.value.forEach(c => c.isShowReplay = false);
+      return;
+    };
     comments.value.forEach(c => c.isShowReplay = false);
-    return;
-  };
-  comments.value.forEach(c => c.isShowReplay = false);
-  comment.isShowReplay = true;
+    comment.isShowReplay = true;
+  } else if(level === 2){
+    Object.assign(commentForm,comment);
+    commentForm.parentId = parentComment.id;
+    commentForm.rootId = parentComment.id || 0;
+    // 关闭其他回复框
+    if(parentComment.isShowReplay){
+      comments.value.forEach(c => c.isShowReplay = false);
+      return;
+    };
+    comments.value.forEach(c => c.isShowReplay = false);
+    parentComment.isShowReplay = true;
+  }
+  console.log(comment,parentComment);
+  
+
 };
 // 提交回复评论
 const submitReplayComment = (comment) => {
   if (!comment.content.trim() || !userInfo.value.id) return;
   commentForm.targetId = comment.userId;
   commentForm.content = comment.content;
-  console.log(comment);
   submitComment(2);
 };
 onBeforeMount(()=>{
@@ -833,86 +839,6 @@ onMounted(() => {
   }
 }
 
-.related-articles-section {
-  background-color: var(--card-bg);
-  border-radius: 24px;
-  padding: 2.5rem;
-  box-shadow: var(--shadow);
-  
-  @media (max-width: 768px) {
-    padding: 1.5rem;
-  }
-  
-  .related-articles-title {
-    font-size: var(--font-size-xl);
-    font-weight: 600;
-    color: var(--text-dark);
-    margin-bottom: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-  
-  .related-articles-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.5rem;
-    
-    @media (max-width: 768px) {
-      grid-template-columns: 1fr;
-    }
-    
-    .related-article-item {
-      display: flex;
-      flex-direction: column;
-      background-color: var(--secondary-color);
-      border-radius: 16px;
-      overflow: hidden;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      
-      &:hover {
-        transform: translateY(-5px);
-        box-shadow: var(--shadow-hover);
-      }
-      
-      .related-article-cover {
-        width: 100%;
-        height: 180px;
-        object-fit: cover;
-      }
-      
-      .related-article-info {
-        padding: 1.5rem;
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-        
-        .related-article-title {
-          font-weight: 600;
-          color: var(--text-color);
-          margin-bottom: 0.5rem;
-          line-height: 1.3;
-        }
-        
-        .related-article-meta {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          font-size: var(--font-size-sm);
-          color: var(--text-light);
-          
-          span {
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-          }
-        }
-      }
-    }
-  }
-}
-
 .comment-actions{
   display: flex;
   justify-content: space-between;
@@ -942,5 +868,16 @@ onMounted(() => {
   display: flex;
   column-gap: 1rem;
   margin-top: 0.75rem;
+}
+.replay-arrow-icon{
+  width: 1em; 
+  height: 1em;
+  transition: transform 0.3s ease;
+  &.is-Spread{
+    transform: rotate(90deg);
+  }
+}
+.comment-content-wrapper{
+  flex: 1;
 }
 </style>

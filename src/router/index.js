@@ -3,7 +3,6 @@ import Home from "../views/Home.vue";
 import Index from "../views/Index.vue";
 import About from "../views/About.vue";
 
-import Article from "../views/Article.vue";
 import Portfolio from "../views/Portfolio.vue";
 import Contact from "../views/Contact.vue";
 
@@ -25,7 +24,6 @@ const routes = [
         name: "ArticleDetail",
         component: () => import("@/views/ArticleDetail/ArticleDetail.vue"),
       },
-      { path: "/new-article/:id", name: "Article", component: Article },
       { path: "/portfolio", name: "Portfolio", component: Portfolio },
       { path: "/contact", name: "Contact", component: Contact },
       {

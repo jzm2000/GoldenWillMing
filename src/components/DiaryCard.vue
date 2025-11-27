@@ -24,7 +24,7 @@
           </span>
           <span class="stat" @click="navigateToDiary">
             <span class="iconfont icon-pinglun"></span>
-            {{ diary.comments || 0 }}
+            {{ diary.commentNum || 0 }}
           </span>
           <span class="stat">
             <span class="iconfont icon-yanjing_xianshi_o" style="font-size:1.6rem"></span>

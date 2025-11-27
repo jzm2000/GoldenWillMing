@@ -1,11 +1,29 @@
 <script setup>
 import { zhCN, dateZhCN } from 'naive-ui'
 import {useRoute} from 'vue-router';
+import {useCheckVersion} from "./hooks/useCheckVersion.js";
+import { onMounted,ref } from "vue";
 const route = useRoute();
 const zhCNConfig = {
   ...zhCN,
   date: dateZhCN
 }
+const { needRefresh, refreshPage,setLocalVersion } = useCheckVersion();
+// 用户自己确认是否刷新页面
+let isSign = ref(true);
+
+onMounted(()=>{
+    if(!import.meta.env.PROD) return;
+    setInterval(()=>{
+      if(needRefresh.value && isSign.value){
+          isSign.value = confirm("发现新版本，是否刷新页面？");
+          if(isSign.value){
+              setLocalVersion();
+              refreshPage();
+          }
+      }
+    },5000);
+})
 
 window.addEventListener("click", function (e) {
   let r = 50;
