@@ -1,26 +1,31 @@
 <template>
-  <div class="g-calendar">
-    <div class="g-calendar-header">
+  <div class="j-calendar">
+    <div class="j-calendar-header">
         <slot name="header">
-            <div class="g-calendar-header-content">
-               <select name="year" v-model="selectForm.year" @change="handleChange" class="g-calendar-select">
-                    <option v-for="year in yearList" :value="year" :key="year">{{ year }}</option>
-               </select>
-               <select name="month" v-model="selectForm.month" @change="handleChange" class="g-calendar-select">
-                    <option v-for="month in monthList" :value="month" :key="month">{{ month }}</option>
-               </select>
+            <div class="j-calendar-header-content">
+              <div class="j-calendar-day">
+                <select name="year" v-model="selectForm.year" @change="handleChange" class="j-calendar-select">
+                      <option v-for="year in yearList" :value="year" :key="year">{{ year }}</option>
+                </select>
+                <select name="month" v-model="selectForm.month" @change="handleChange" class="j-calendar-select">
+                      <option v-for="month in monthList" :value="month" :key="month">{{ month }}</option>
+                </select>
+              </div>
+              <div class="j-calendar-btn">
+                <div class="j-calendar-today" @click="handleClickToday">今天</div>
+              </div>
             </div>
         </slot>
     </div>
-    <div class="g-calendar-body">
-      <div class="g-calendar-week">
-        <div class="g-calendar-week-item" v-for="item in weekList" :key="item">
+    <div class="j-calendar-body">
+      <div class="j-calendar-week">
+        <div class="j-calendar-week-item" v-for="item in weekList" :key="item">
           {{ item }}
         </div>
       </div>
-      <div class="g-calendar-day">
+      <div class="j-calendar-day">
         <div 
-          :class="['g-calendar-day-item',{'not-current-month':!item.isCurrentMonth,'is-today':item.isToday,'is-selected':item.isSelected}]" 
+          :class="['j-calendar-day-item',{'not-current-month':!item.isCurrentMonth,'is-today':item.isToday,'is-selected':item.isSelected}]" 
           v-for="item in dayList" 
           :key="item.fullDate"
           @click="handleClick(item)"
@@ -28,9 +33,6 @@
           {{ item.day }}
         </div>
       </div>
-    </div>
-    <div class="g-calendar-operation">
-     
     </div>
   </div>
 </template>
@@ -41,17 +43,10 @@ const props = defineProps({
     date: {
         type: String,
         default: ''
-    },
-    valueFormat: {
-        type: String,
-        default: 'YYYY-MM-DD'
     }
 });
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(['update:modelValue','change']);
 
-const isFull = computed(() => {
-    return props.valueFormat === 'YYYY-MM-DD';
-});
 const date = ref('2025-11-27');
 
 let selectDate = reactive({});
@@ -61,6 +56,15 @@ let selectForm = reactive({
 });
 let dayList = ref([]);
 let yearList = ref([]);
+let weekList = ref([
+  '周日',
+  '周一',
+  '周二',
+  '周三',
+  '周四',
+  '周五',
+  '周六',
+]);
 let monthList = ref([1,2,3,4,5,6,7,8,9,10,11,12]);
 let y = new Date();
 let nowY = y.getFullYear();
@@ -68,8 +72,7 @@ let nowM = y.getMonth() + 1;
 let nowD = y.getDate();
 
 yearList.value = [...[4,3,2,1].map(i => nowY + i),...[0,1,2,3,4,5].map(i => nowY- i)]
-selectForm.year = nowY;
-selectForm.month = nowM;
+setDateList();
 
 function setDateList(date=Date.now()){
     dayList.value = [];
@@ -79,7 +82,8 @@ function setDateList(date=Date.now()){
     let _day = _date.getDate();
     let _week = _date.getDay();
 
-    console.log(_year, _month, _day,_week);
+    selectForm.year = _year;
+    selectForm.month = _month;
     // 获取当前月有多少天
     let lastDay = new Date(_year, _month, 0).getDate();
     // 计算上个月有多少天
@@ -118,32 +122,21 @@ function setDateList(date=Date.now()){
             isSelected: false,
         });
     };
-    console.log(lastDay,_day,firstWeek);
-    console.log('上个月：',lastMonthDay);
-    console.log('当前月：',lastDay);
-    console.log('下个月：',nextMonthDay);
 };
 function handleChange(){
-    console.log(selectForm.year,selectForm.month);
-    
     if(selectForm.year && selectForm.month){
         setDateList(`${selectForm.year}-${selectForm.month}-01`);
     }
 }
-
-
-setDateList();
-
-let weekList = ref([
-  '周日',
-  '周一',
-  '周二',
-  '周三',
-  '周四',
-  '周五',
-  '周六',
-]);
-
+function handleClickToday(){
+  setDateList();
+  let selectObj = dayList.value.find(item => item.isToday);
+  if(selectObj){
+    handleClick(selectObj);
+  };
+  selectForm.year = selectObj.fullDate.split('-')[0];
+  selectForm.month = selectObj.fullDate.split('-')[1];
+};
 function handleClick(item){
     dayList.value.forEach((item) => {
         item.isSelected = false;
@@ -152,27 +145,35 @@ function handleClick(item){
     date.value = item.fullDate;
     Object.assign(selectDate,item);
     emit('update:modelValue',selectDate.fullDate);
+    emit("change",JSON.parse(JSON.stringify(item)));
 };
+function setDate(date){
+  setDateList(date);
+}
+
+defineExpose({
+  setDate
+})
 </script>
 
 <style scoped lang="scss">
-.g-calendar {
+.j-calendar {
   width: 300px;
   border: 1px solid #ccc;
   padding: 8px;
 }
-.g-calendar-header {
-  padding: 10px;
+.j-calendar-header {
+  padding: 10px 0;
 }
 
-.g-calendar-header-content {
+.j-calendar-header-content {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
     gap: 10px;
   }
   
-  .g-calendar-select {
+  .j-calendar-select {
     padding: 6px 12px 6px 0;
     border: 1px solid #d0d5dd;
     border-radius: 6px;
@@ -205,21 +206,36 @@ function handleClick(item){
       transform: translateY(0.5px);
     }
   }
-.g-calendar-week {
+  .j-calendar-select:nth-child(2) {
+    margin-left: 10px;
+  }
+.j-calendar-week {
   display: flex;
   padding-bottom: 10px;
   border-bottom: 1px solid #ccc;
 }
-.g-calendar-week-item {
+.j-calendar-week-item {
   text-align: center;
   width: calc(100% / 7);
 
 }
-.g-calendar-day{
+.j-calendar-day{
     display: flex;
     flex-wrap: wrap;
 }
-.g-calendar-day-item {
+.j-calendar-today{
+  text-align: center;
+  height: 30px;
+  line-height: 30px;
+  border: 1px solid #dcdee0;
+  background-color: #fff;
+  padding: 0 10px;
+  cursor: pointer;
+  &:hover{
+      background-color: #eaecf2;
+  }
+}
+.j-calendar-day-item {
     text-align: center;
     width: calc(100% / 7);
     height: 30px;
@@ -230,14 +246,14 @@ function handleClick(item){
         background-color: #eaecf2;
     }
 }
-.g-calendar-day-item.not-current-month {
+.j-calendar-day-item.not-current-month {
     color:#a6acb1;
 }
-.g-calendar-day-item.is-today {
+.j-calendar-day-item.is-today {
     background-color: #1975c5;
     color: #fff;
 }
-.g-calendar-day-item.is-selected {
+.j-calendar-day-item.is-selected {
     border: 1px solid #1975c5;
 }
 </style>
