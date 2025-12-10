@@ -1,9 +1,9 @@
 <template>
-  <div class="j-calendar">
+  <div class="j-calendar" :style="wrapStyle">
     <div class="j-calendar-header">
         <slot name="header">
             <div class="j-calendar-header-content">
-              <div class="j-calendar-day">
+              <div class="j-calendar-date">
                 <select name="year" v-model="selectForm.year" @change="handleChange" class="j-calendar-select">
                       <option v-for="year in yearList" :value="year" :key="year">{{ year }}</option>
                 </select>
@@ -23,14 +23,16 @@
           {{ item }}
         </div>
       </div>
-      <div class="j-calendar-day">
+      <div class="j-calendar-day" :style="{'gap':addUnit(gap)}">
         <div 
           :class="['j-calendar-day-item',{'not-current-month':!item.isCurrentMonth,'is-today':item.isToday,'is-selected':item.isSelected}]" 
           v-for="item in dayList" 
           :key="item.fullDate"
           @click="handleClick(item)"
           >
-          {{ item.day }}
+          <slot name="item" :item="item">
+            {{ item.day }}
+          </slot>
         </div>
       </div>
     </div>
@@ -40,14 +42,30 @@
 <script setup>
 import { ref,computed, reactive } from 'vue'
 const props = defineProps({
-    date: {
+    modelValue: {
         type: String,
         default: ''
+    },
+    width:{
+        type:[String,Number],
+        default:"100%"
+    },
+    gap:{
+        type:[String,Number],
+        default:"0"
+    },
+    borderColor:{
+        type:String,
+        default:"transparent"
     }
 });
 const emit = defineEmits(['update:modelValue','change']);
 
-const date = ref('2025-11-27');
+const wrapStyle = computed(()=>{
+  const style = {};
+  if(props.width) style.width = addUnit(props.width);
+  return [style]
+})
 
 let selectDate = reactive({});
 let selectForm = reactive({
@@ -99,27 +117,30 @@ function setDateList(date=Date.now()){
         dayList.value.push({
             day:i,
             fullDate:`${_year}-${_month < 10 ? '0' + _month : _month}-${i < 10 ? '0' + i : i}`,
+            shortDate:`${_month < 10 ? '0' + _month : _month}-${i < 10 ? '0' + i : i}`,
             isCurrentMonth: true,
             isToday: i === nowD && _month === nowM && _year === nowY,
-            isSelected: false,
+            isSelected: getDateTime(props.modelValue) === getDateTime(_year + '-' + _month + '-' + i),
         });
     };
     for(let i = 0; i< firstWeek;i++){
         dayList.value.unshift({
             day:lastMonthDay - i,
             fullDate:`${_year}-${_month - 1 < 10 ? '0' + (_month - 1) : _month - 1}-${lastMonthDay - i < 10 ? '0' + (lastMonthDay - i) : lastMonthDay - i}`,
+            shortDate:`${_month - 1 < 10 ? '0' + (_month - 1) : _month - 1}-${lastMonthDay - i < 10 ? '0' + (lastMonthDay - i) : lastMonthDay - i}`,
             isCurrentMonth: false,
             isToday: false,
-            isSelected: false,
+            isSelected: getDateTime(props.modelValue) === getDateTime(_year + '-' + (_month - 1) + '-' + (lastMonthDay - i)),
         });
     };
     for(let i = 1; i<= nextMonthDayCount;i++){
         dayList.value.push({
             day:i,
             fullDate:`${_year}-${_month + 1 < 10 ? '0' + (_month + 1) : _month + 1}-${i < 10 ? '0' + i : i}`,
+            shortDate:`${_month + 1 < 10 ? '0' + (_month + 1) : _month + 1}-${i < 10 ? '0' + i : i}`,
             isCurrentMonth: false,
             isToday: false,
-            isSelected: false,
+            isSelected: getDateTime(props.modelValue) === getDateTime(_year + '-' + (_month + 1) + '-' + i),
         });
     };
 };
@@ -142,13 +163,25 @@ function handleClick(item){
         item.isSelected = false;
     });
     item.isSelected = true;
-    date.value = item.fullDate;
+    // date.value = item.fullDate;
     Object.assign(selectDate,item);
     emit('update:modelValue',selectDate.fullDate);
     emit("change",JSON.parse(JSON.stringify(item)));
 };
 function setDate(date){
   setDateList(date);
+};
+function getDateTime(date){
+  if(!date) return '';
+  let _date = new Date(date);
+  let _year = _date.getFullYear();
+  let _month = _date.getMonth() + 1;
+  let _day = _date.getDate();
+  return `${_year}-${_month < 10 ? '0' + _month : _month}-${_day < 10 ? '0' + _day : _day}`;
+};
+function addUnit(value){
+  if(typeof value === 'number') return `${value}px`;
+  return value;
 }
 
 defineExpose({
@@ -158,9 +191,10 @@ defineExpose({
 
 <style scoped lang="scss">
 .j-calendar {
-  width: 300px;
+  min-width: 300px;
   border: 1px solid #ccc;
   padding: 8px;
+  box-sizing: border-box;
 }
 .j-calendar-header {
   padding: 10px 0;
@@ -183,11 +217,6 @@ defineExpose({
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease-in-out;
-    appearance: none;
-    background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="%23667085" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
-    background-repeat: no-repeat;
-    background-position: right 8px center;
-    background-size: 16px;
     min-width: 80px;
     text-align: center;
     
@@ -219,9 +248,18 @@ defineExpose({
   width: calc(100% / 7);
 
 }
+.j-calendar-date{
+  display: flex;
+  flex-wrap: wrap;
+}
 .j-calendar-day{
-    display: flex;
-    flex-wrap: wrap;
+    // display: flex;
+    // flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: repeat(6, 1fr);
+    margin-top: 4px;
+    gap: 4px;
 }
 .j-calendar-today{
   text-align: center;
@@ -237,10 +275,10 @@ defineExpose({
 }
 .j-calendar-day-item {
     text-align: center;
-    width: calc(100% / 7);
-    height: 30px;
-    line-height: 30px;
-    border: 1px solid transparent;
+    // width: calc(100% / 7);
+    // min-height: 30px;
+    // line-height: 30px;
+    border: 1px solid v-bind('props.borderColor');
     cursor: pointer;
     &:hover{
         background-color: #eaecf2;
@@ -255,5 +293,7 @@ defineExpose({
 }
 .j-calendar-day-item.is-selected {
     border: 1px solid #1975c5;
+    background-color: #ecf5ff;
+    color: #1975c5;
 }
 </style>
