@@ -29,6 +29,7 @@ function sendMessage() {
   if (ws.readyState === WebSocket.OPEN) {
     ws.send(JSON.stringify({
       type: 'chat',
+      role:'user',
       content: message.value
     }));
   } else {
