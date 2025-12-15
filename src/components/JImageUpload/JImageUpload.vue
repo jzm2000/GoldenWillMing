@@ -75,6 +75,7 @@
 
 import { reactive, toRefs, ref, watch } from "vue";
 import { Plus, ZoomIn, Download, Delete } from '@element-plus/icons-vue'
+
 export default {
   name: "JImageUpload",
   props: {
@@ -176,6 +177,11 @@ export default {
         const files = Array.from(e.target.files);
         console.log(files);
         
+        if (state.fileList.length + files.length > props.limit) {
+          console.log('超出最大上传数量');
+          return;
+        }
+
         files.forEach(async (file) => {
           try {
 
