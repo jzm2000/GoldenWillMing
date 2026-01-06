@@ -13,7 +13,7 @@
       <div class="card-header">
         <div class="logo">
           <span class="logo-icon">🌟</span>
-          <span class="logo-text">人明日记</span>
+          <span class="logo-text">心情日记网</span>
         </div>
         <h2 class="card-title">欢迎回来</h2>
         <p class="card-subtitle">登录您的账号继续您的创作之旅</p>
@@ -202,7 +202,7 @@
     
     <!-- 页脚 -->
     <footer class="login-footer">
-      <p>&copy; 2025 人明日记 版权所有</p>
+      <p>&copy; 2025 心情日记网 版权所有</p>
     </footer>
   </div>
 </template>

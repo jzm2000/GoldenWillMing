@@ -5,14 +5,14 @@
       <div class="container">
         <div class="header-content">
           <h1 class="page-title">
-            <i class="iconfont icon-riji"></i> 写日记
+            📓写日记
           </h1>
           <div class="header-actions">
-            <button class="btn btn-secondary" @click="saveDraft">
+            <!-- <button class="btn btn-secondary" @click="saveDraft">
               <i class="iconfont icon-bianji"></i> 保存草稿
-            </button>
+            </button> -->
             <button class="btn btn-primary" @click="publishDiary">
-              <i class="iconfont icon-fabu"></i> 发布
+              <i class="iconfont icon-fabu"></i> {{ isEdited ? '保存' : '发布' }}
             </button>
           </div>
         </div>
@@ -84,8 +84,9 @@
               <div class="setting-item">
                 <label>日期</label>
                 <input 
-                  v-model="diaryForm.date" 
+                  v-model="diaryForm.created_at" 
                   type="date" 
+                  :disabled="true"
                   class="setting-input"
                 />
               </div>
@@ -215,22 +216,28 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, reactive, computed,onBeforeUnmount } from 'vue'
+import { useRouter,useRoute } from 'vue-router'
 import { useArticleStore } from '../store/article.js'
 import { useUserStore } from "@/store/user.js"
-import { addDiary,categoryList } from "@/api/index.js"
+import { useDiaryStore } from "@/store/diary.js"
+import { addDiary,categoryList,updateDiary } from "@/api/index.js"
 
-const router = useRouter()
+const router = useRouter();
+const route = useRoute();
 const articleStore = useArticleStore()
 const userStore = useUserStore();
+const diaryStore = useDiaryStore();
+let isEdited = ref(false);
 
+const { isEdit = false,categoryId = null,id = null } = route.query;
 // 日记表单数据
 const diaryForm = reactive({
+  id:'',
   title: '',
   content: '',
   // excerpt: '',
-  date: new Date().toISOString().split('T')[0],
+  created_at:"",
   categoryId: '',
   tags: [],
   privacy: '0',
@@ -259,6 +266,19 @@ const weathers = [
   { id: 'stormy', name: '暴风雨', icon: '⛈️' },
   { id: 'night', name: '夜晚', icon: '🌙' }
 ]
+
+isEdited.value = isEdit === 'true';
+diaryForm.id = id ? id : undefined;
+diaryForm.categoryId = categoryId ? categoryId : '';
+
+if(isEdited.value){
+   Object.keys(diaryForm).forEach(key => {
+    diaryForm[key] = diaryStore.diaryInfo[key] || '';
+   });
+   diaryForm.categoryId = diaryStore.diaryInfo.category_id;
+   diaryForm.created_at = formatDate(diaryStore.diaryInfo.created_at);
+   console.log(diaryForm);
+}
 
 let categories = ref([]);
 // 选中的情绪和天气
@@ -354,7 +374,7 @@ function saveDraft() {
 }
 
 // 发布日记
-function publishDiary() {
+async function publishDiary() {
   if (!userStore.userInfo?.id) {
     showSuccessMessage('请先登录')
     return
@@ -371,25 +391,29 @@ function publishDiary() {
     showSuccessMessage('请选择分类')
     return
   };
-
   // 创建新日记对象
   let params = {
     title: diaryForm.title,
     content: diaryForm.content,
     categoryId: diaryForm.categoryId,
     privacy: diaryForm.privacy,
-    userId:userStore.userInfo?.id,
+    userId: userStore.userInfo?.id,
   };
-  addDiary(params).then(res=>{
-    if(res.code==200){
-      showSuccessMessage('日记发布成功！');
-      setTimeout(() => {
-        router.push('/articles')
-      }, 1500)
-    }else {
-      showSuccessMessage(res.msg);
-    }
-  });
+  let res;
+  if (isEdited.value) {
+    params.id = diaryForm.id;
+    res = await updateDiary(params);
+  } else {
+    res = await addDiary(params);
+  }
+  if (res.code == 200) {
+    showSuccessMessage('日记发布成功！');
+    setTimeout(() => {
+      router.push('/articles')
+    }, 1500)
+  } else {
+    showSuccessMessage(res.msg);
+  }
 }
 
 // 显示成功消息
@@ -401,8 +425,21 @@ function showSuccessMessage(message) {
   }, 2000)
 };
 
+function formatDate(dateString){
+    const date = new Date(dateString);  
+    // 1. 获取年、月、日（注意：月份从 0 开始，需 +1）
+    const year = date.getFullYear().toString(); // 两位数年份（YY）
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // 两位数月份（MM）
+    const day = String(date.getDate()).padStart(2, '0'); // 两位数日期（DD）
+    return `${year}-${month}-${day}`;
+}
+
 // 事件执行
 getCategoryList();
+
+onBeforeUnmount(() => {
+  diaryStore.setDiaryInfo({});
+});
 </script>
 
 <style lang="scss" scoped>
@@ -441,6 +478,7 @@ getCategoryList();
   align-items: center;
   gap: 0.5rem;
   position: relative;
+  color: #fff;
 }
 
 .page-title::after {

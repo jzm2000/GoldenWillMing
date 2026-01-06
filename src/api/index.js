@@ -7,10 +7,10 @@ export const login = (params) => post("/users/login",params);
 export const register = (params) => post("/users/register",params);
 // 获取用户信息
 export const getUserInfo = () => post("/users/info");
-
+// 退出登录
+export const logout = () => post("/users/logout");
 //#endregion 用户模块
 
-// 日记模块
 //#region日记模块
 // 日记新增
 export const addDiary = (params) => post("/diary/add",params);
@@ -24,5 +24,13 @@ export const getPublicDiaryList = (params) => get("/public/diary/list",params);
 export const likeDiary = (params) => post("/diary/like",params);
 // 日记分类
 export const categoryList = (params) => get("/diary-category/categoryList",params);
-
+// 公开日记分类
+export const publicCategoryList = (params) => get("/public/publicCategoryList",params);
+// 日记详情
+export const getDiaryById = (params) => post("/diary/detail",params);
 //#endregion 日记模块
+
+//#region 最新消息模块
+export const getRecentNews = (params) => get("/recent-news/list",params);
+
+//#endregion 最新消息模块
