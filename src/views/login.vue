@@ -13,7 +13,7 @@
       <div class="card-header">
         <div class="logo">
           <span class="logo-icon">🌟</span>
-          <span class="logo-text">人明日记</span>
+          <span class="logo-text">心情日记网</span>
         </div>
         <h2 class="card-title">欢迎回来</h2>
         <p class="card-subtitle">登录您的账号继续您的创作之旅</p>
@@ -77,9 +77,14 @@
             <input type="checkbox" v-model="loginForm.rememberMe" />
             <span>记住我</span>
           </label>
-          <button type="button" class="forgot-password">忘记密码？</button>
+          <button type="button" class="forgot-password" @click="handleForgotPassword">忘记密码？</button>
         </div>
-        
+        <div class="form-disclaimer">
+          登录或注册即表示您已阅读并同意
+          <a href="/file/userAgreement.html" target="_blank">用户协议</a>
+          和
+          <a href="/file/disclaimer.html" target="_blank">免责声明</a>
+        </div>
         <button type="submit" class="submit-button">登录</button>
       </form>
       
@@ -199,11 +204,6 @@
         </button>
       </div> -->
     </div>
-    
-    <!-- 页脚 -->
-    <footer class="login-footer">
-      <p>&copy; 2025 人明日记 版权所有</p>
-    </footer>
   </div>
 </template>
 
@@ -305,6 +305,10 @@ const handleRegister = () => {
     }
   })
 };
+// 处理忘记密码
+const handleForgotPassword = () => {
+   message.info("请联系管理员重置密码");
+}
 </script>
 
 <style scoped lang="scss">
@@ -528,7 +532,6 @@ const handleRegister = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
   
   .remember-me {
     display: flex;
@@ -673,7 +676,16 @@ const handleRegister = () => {
     color: #1877F2;
   }
 }
-
+.form-disclaimer{
+  color: var(--text-color);
+  margin: 1.5rem 0;
+  font-size: 0.875rem;
+  a{
+    color: blue;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+}
 /* 页脚 */
 .login-footer {
   margin-top: 2rem;

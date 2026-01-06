@@ -2,10 +2,7 @@ import { createRouter, createWebHistory,createWebHashHistory } from "vue-router"
 import Home from "../views/Home.vue";
 import Index from "../views/Index.vue";
 import About from "../views/About.vue";
-import ArticleList from "../views/ArticleList.vue";
-import ArticleDetail from "../views/ArticleDetail.vue";
-import Articles from "../views/Articles.vue";
-import Article from "../views/Article.vue";
+
 import Portfolio from "../views/Portfolio.vue";
 import Contact from "../views/Contact.vue";
 
@@ -23,11 +20,10 @@ const routes = [
       { path: "/about", name: "About", component: About },
       { path: "/articles", name: "Articles", component: () => import("@/views/Articles.vue") },
       {
-        path: "/articles/:id",
+        path: "/article-detail/:id",
         name: "ArticleDetail",
-        component: ArticleDetail,
+        component: () => import("@/views/ArticleDetail/ArticleDetail.vue"),
       },
-      { path: "/new-article/:id", name: "Article", component: Article },
       { path: "/portfolio", name: "Portfolio", component: Portfolio },
       { path: "/contact", name: "Contact", component: Contact },
       {
@@ -35,7 +31,22 @@ const routes = [
         name: "WriteDiary",
         component: () => import("@/views/WriteDiary.vue"),
       },
+      {
+        path: "/profile",
+        name: "Profile",
+        component: () => import("@/views/Profile/Profile.vue"),
+      },
+      {
+        path: '/profile-edit',
+        name: "ProfileEdit",
+        component: () => import("@/views/Profile/ProfileEdit.vue"),
+      }
     ],
+  },
+  {
+    path: '/test',
+    name: "Test",
+    component: () => import("@/views/test.vue"),
   },
   {
     path: "/login",
@@ -45,7 +56,7 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory(),
   routes,
   scrollBehavior(to, from, savedPosition) {
     return { top: 0 };

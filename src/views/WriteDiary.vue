@@ -5,14 +5,14 @@
       <div class="container">
         <div class="header-content">
           <h1 class="page-title">
-            <i class="iconfont icon-riji"></i> 写日记
+            📓写日记
           </h1>
           <div class="header-actions">
-            <button class="btn btn-secondary" @click="saveDraft">
+            <!-- <button class="btn btn-secondary" @click="saveDraft">
               <i class="iconfont icon-bianji"></i> 保存草稿
-            </button>
+            </button> -->
             <button class="btn btn-primary" @click="publishDiary">
-              <i class="iconfont icon-fabu"></i> 发布
+              <i class="iconfont icon-fabu"></i> {{ isEdited ? '保存' : '发布' }}
             </button>
           </div>
         </div>
@@ -43,15 +43,23 @@
                 placeholder="开始记录你的一天..."
                 class="diary-content-input"
                 @input="updateExcerpt"
+                @blur="handleBlur"
+                ref="contentInputRef"
               ></textarea>
             </div>
+
+            <EmojiMartVue3 @change="handleEmojiChange">
+              <div style="font-size: 21px;cursor: pointer;margin-bottom: 1rem;">
+                😊
+              </div>
+            </EmojiMartVue3>
 
             <!-- 图片上传区域 -->
             <div class="editor-section">
               <div class="upload-section">
                 <label class="upload-label">
                   <i class="iconfont icon-tupian"></i> 添加图片
-                  <input type="file" accept="image/*" multiple @change="handleImageUpload" class="upload-input" />
+                  <input type="file" accept="image/*" @change="handleImageUpload" class="upload-input" />
                 </label>
                 <div class="upload-tip">支持JPG、PNG格式，单张不超过5MB</div>
               </div>
@@ -63,10 +71,10 @@
                   :key="index" 
                   class="image-preview-item"
                 >
-                  <img :src="image" alt="预览图片" class="preview-image" />
-                  <button @click="removeImage(index)" class="remove-image-btn">
-                    <i class="iconfont icon-shanchu"></i>
-                  </button>
+                  <img :src="$baseURL + image" alt="预览图片" class="preview-image" />
+                  <div @click="removeImage(index)" class="remove-image-btn">
+                    ×
+                  </div>
                 </div>
               </div>
             </div>
@@ -84,8 +92,9 @@
               <div class="setting-item">
                 <label>日期</label>
                 <input 
-                  v-model="diaryForm.date" 
+                  v-model="diaryForm.created_at" 
                   type="date" 
+                  :disabled="true"
                   class="setting-input"
                 />
               </div>
@@ -215,26 +224,46 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, reactive, computed,onBeforeUnmount } from 'vue'
+import { useRouter,useRoute } from 'vue-router'
 import { useArticleStore } from '../store/article.js'
 import { useUserStore } from "@/store/user.js"
-import { addDiary,categoryList } from "@/api/index.js"
+import { useDiaryStore } from "@/store/diary.js"
+import { addDiary,categoryList,updateDiary,uploadPhoto } from "@/api/index.js"
+import EmojiMartVue3 from "@/components/EmojiMartVue3/EmojiMartVue3.vue"
 
-const router = useRouter()
+const router = useRouter();
+const route = useRoute();
 const articleStore = useArticleStore()
 const userStore = useUserStore();
+const diaryStore = useDiaryStore();
+let isEdited = ref(false);
 
+let categories = ref([]);
+let cursorIndex = ref(0);
+// 选中的情绪和天气
+const selectedEmotions = ref([])
+const selectedWeather = ref('')
+const newTag = ref('')
+const uploadedImages = ref([])
+const contentInputRef = ref(null);
+
+// 提示信息
+const showSuccess = ref(false)
+const successMessage = ref('')
+
+const { isEdit = false,categoryId = null,id = null } = route.query;
 // 日记表单数据
 const diaryForm = reactive({
+  id:'',
   title: '',
   content: '',
   // excerpt: '',
-  date: new Date().toISOString().split('T')[0],
+  created_at:"",
   categoryId: '',
   tags: [],
   privacy: '0',
-  images: []
+  imageUrl: []
 })
 
 // 情绪和天气选项
@@ -260,16 +289,30 @@ const weathers = [
   { id: 'night', name: '夜晚', icon: '🌙' }
 ]
 
-let categories = ref([]);
-// 选中的情绪和天气
-const selectedEmotions = ref([])
-const selectedWeather = ref('')
-const newTag = ref('')
-const uploadedImages = ref([])
+isEdited.value = isEdit === 'true';
+diaryForm.id = id ? id : undefined;
+diaryForm.categoryId = categoryId ? categoryId : '';
 
-// 提示信息
-const showSuccess = ref(false)
-const successMessage = ref('')
+
+if(isEdited.value){
+   Object.keys(diaryForm).forEach(key => {
+    if(key === 'imageUrl'){
+      diaryForm[key] = diaryStore.diaryInfo[key] || [];
+      if(diaryForm[key].length > 0){
+        uploadedImages.value.push(diaryForm[key]);
+        diaryForm[key] = [diaryStore.diaryInfo[key]]
+      }
+    }else{
+      diaryForm[key] = diaryStore.diaryInfo[key] || '';
+    }
+   });
+   diaryForm.categoryId = diaryStore.diaryInfo.category_id;
+   diaryForm.created_at = formatDate(diaryStore.diaryInfo.created_at);
+   console.log(diaryForm);
+} else {
+  diaryForm.created_at = formatDate(new Date());
+}
+
 
 // 获取分类列表
 const getCategoryList = async() =>{
@@ -318,28 +361,27 @@ function removeTag(index) {
 
 // 处理图片上传
 function handleImageUpload(event) {
-  return showSuccessMessage('暂不支持添加图片');
   const files = event.target.files
-  if (files) {
-    Array.from(files).forEach(file => {
-      if (file.size < 5 * 1024 * 1024) { // 5MB限制
-        const reader = new FileReader()
-        reader.onload = (e) => {
-          uploadedImages.value.push(e.target.result)
-          diaryForm.images.push(e.target.result)
-        }
-        reader.readAsDataURL(file)
-      }
-    })
-  }
-  // 清空input，以便可以重复选择同一文件
-  event.target.value = ''
+  uploadPhoto({
+    file:files[0],
+  }).then(res =>{
+    console.log(res);
+    if(res.code == 200){
+      uploadedImages.value.push(res.url);
+      diaryForm.imageUrl.push(res.url);
+    }else {
+      showSuccessMessage(res.msg);
+      // 清空input
+      event.target.value = '';
+    }
+  })
+  console.log(files);
 }
 
 // 移除图片
 function removeImage(index) {
   uploadedImages.value.splice(index, 1)
-  diaryForm.images.splice(index, 1)
+  diaryForm.imageUrl.splice(index, 1)
 }
 
 // 保存草稿
@@ -354,7 +396,7 @@ function saveDraft() {
 }
 
 // 发布日记
-function publishDiary() {
+async function publishDiary() {
   if (!userStore.userInfo?.id) {
     showSuccessMessage('请先登录')
     return
@@ -371,25 +413,45 @@ function publishDiary() {
     showSuccessMessage('请选择分类')
     return
   };
-
   // 创建新日记对象
   let params = {
     title: diaryForm.title,
     content: diaryForm.content,
     categoryId: diaryForm.categoryId,
     privacy: diaryForm.privacy,
-    userId:userStore.userInfo?.id,
+    userId: userStore.userInfo?.id,
+    imageUrl: diaryForm.imageUrl[0] || '',
   };
-  addDiary(params).then(res=>{
-    if(res.code==200){
-      showSuccessMessage('日记发布成功！');
-      setTimeout(() => {
-        router.push('/articles')
-      }, 1500)
-    }else {
-      showSuccessMessage(res.msg);
-    }
-  });
+  let res;
+  if (isEdited.value) {
+    params.id = diaryForm.id;
+    res = await updateDiary(params);
+  } else {
+    res = await addDiary(params);
+  }
+  if (res.code == 200) {
+    showSuccessMessage('日记发布成功！');
+    setTimeout(() => {
+      router.back();
+    }, 1500)
+  } else {
+    showSuccessMessage(res.msg);
+  }
+}
+function handleEmojiChange(emoji){
+  let content = diaryForm.content;
+  content = content.substring(0,cursorIndex.value) + emoji + content.substring(cursorIndex.value);
+  diaryForm.content = content;
+
+  cursorIndex.value += emoji.length;
+  contentInputRef.value.focus();
+
+  setTimeout(() => {
+    contentInputRef.value.selectionStart = contentInputRef.value.selectionEnd =  cursorIndex.value;
+  }, 0);
+}
+function handleBlur(e){
+  cursorIndex.value = e.target.selectionStart;
 }
 
 // 显示成功消息
@@ -401,8 +463,21 @@ function showSuccessMessage(message) {
   }, 2000)
 };
 
+function formatDate(dateString){
+    const date = new Date(dateString);  
+    // 1. 获取年、月、日（注意：月份从 0 开始，需 +1）
+    const year = date.getFullYear().toString(); // 两位数年份（YY）
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // 两位数月份（MM）
+    const day = String(date.getDate()).padStart(2, '0'); // 两位数日期（DD）
+    return `${year}-${month}-${day}`;
+}
+
 // 事件执行
 getCategoryList();
+
+onBeforeUnmount(() => {
+  diaryStore.setDiaryInfo({});
+});
 </script>
 
 <style lang="scss" scoped>
@@ -441,6 +516,7 @@ getCategoryList();
   align-items: center;
   gap: 0.5rem;
   position: relative;
+  color: #fff;
 }
 
 .page-title::after {
