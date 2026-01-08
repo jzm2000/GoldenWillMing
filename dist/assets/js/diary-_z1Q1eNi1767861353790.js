@@ -1,0 +1,1 @@
+import{M as s}from"./vendor-B5nbblyg1767861353790.js";const r=s("diary",{state:()=>({diaryInfo:{}}),actions:{setDiaryInfo(e){this.diaryInfo=e}},persist:{enabled:!0,strategies:[{storage:window.sessionStorage}]}});export{r as u};
