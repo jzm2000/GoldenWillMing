@@ -1,5 +1,5 @@
 <template>
-  <nav class="navbar" :class="{ 'sticky': isSticky }">
+  <nav class="navbar">
     <div class="container">
       <router-link to="/" class="logo">
         <span class="logo-icon">🌟</span>
@@ -11,8 +11,8 @@
         <NavItem to="/" icon="🏠">首页</NavItem>
         <NavItem to="/articles" icon="📝">日记</NavItem>
         <!-- <NavItem to="/portfolio" icon="🎨">作品</NavItem> -->
-        <NavItem to="/about" icon="👤">关于</NavItem>
-        <NavItem to="/contact" icon="✉️">联系</NavItem>
+        <!-- <NavItem to="/about" icon="👤">关于</NavItem> -->
+        <!-- <NavItem to="/contact" icon="✉️">联系</NavItem> -->
         <NavItem to="/login" icon="🔑" v-if="!userStore.getToken">登录/注册</NavItem>
         <div v-else>
             <n-dropdown :options="options" show-arrow :on-select="handleSelect">
@@ -41,9 +41,20 @@
       <div class="mobile-nav-links">
         <NavItem to="/" icon="🏠" @click="closeMobileMenu" color="#000">首页</NavItem>
         <NavItem to="/articles" icon="📝" @click="closeMobileMenu" color="#000">日记</NavItem>
+        <NavItem to="/login" icon="🔑" v-if="!userStore.getToken">登录/注册</NavItem>
+        <div v-else>
+            <n-dropdown :options="options" show-arrow :on-select="handleSelect">
+              <div class="flex items-center justify-center user-info">
+                <span class="nickname">{{ userInfo.nickname }}</span>
+                <div class="user-avatar">
+                  <img :src="userInfo.avatar || defaultAvatar" alt="用户头像">
+                </div>
+              </div>
+            </n-dropdown>
+        </div>
         <!-- <NavItem to="/portfolio" icon="🎨" @click="closeMobileMenu" color="#000">作品</NavItem> -->
-        <NavItem to="/about" icon="👤" @click="closeMobileMenu" color="#000">关于</NavItem>
-        <NavItem to="/contact" icon="✉️" @click="closeMobileMenu" color="#000">联系</NavItem>
+        <!-- <NavItem to="/about" icon="👤" @click="closeMobileMenu" color="#000">关于</NavItem> -->
+        <!-- <NavItem to="/contact" icon="✉️" @click="closeMobileMenu" color="#000">联系</NavItem> -->
       </div>
     </div>
   </nav>
@@ -53,22 +64,17 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 // 子组件：导航项
 import { h } from 'vue'
-import { RouterLink } from 'vue-router';
+import { RouterLink,useRouter } from 'vue-router';
 import { useUserStore } from "@/store/user.js";
 import { User, Edit, SwitchButton } from '@element-plus/icons-vue';
 import { NIcon } from 'naive-ui';
 import { storeToRefs } from "pinia";
+import { logout } from "@/api/index.js";
 import defaultAvatar from '@/assets/img/avatar.jpeg'
 
+const router = useRouter();
 const userStore = useUserStore();
 const { userInfo } = storeToRefs(userStore);
-
-const props = defineProps({
-   color:{
-    type:String,
-    default:'#000'
-   }
-})
 
 const NavItem = (prop, { slots }) => {
   const baseClasses = 'nav-item flex items-center gap-1.5 px-3 py-2 rounded-lg transition-all duration-300'
@@ -97,7 +103,7 @@ const NavItem = (prop, { slots }) => {
           h('span', {
             class: 'nav-item-icon',
           }, prop.icon),
-          h('span', { class:'nav-item_text',style:{color:prop.color} }, slots.default?.()) 
+          h('span', { class:'nav-item_text' }, slots.default?.()) 
         ])
       ])
     }
@@ -146,8 +152,16 @@ const closeMobileMenu = () => {
 }
 const handleSelect = (key) =>{
   if(key === 'logout'){
-    userStore.logout();
-  }
+    logout().then(res=>{
+      if(res.code==200){
+        userStore.logout();
+      };
+    })
+  }else if(key === 'profile'){
+    router.push('/profile');
+  };
+  isMobileMenuOpen.value = false;
+  document.body.style.overflow = ''
 }
 // 生命周期钩子
 onMounted(() => {
@@ -162,14 +176,20 @@ onUnmounted(() => {
 
 <style scoped lang="scss">
 :deep(.nav-item_text) {
-  color:v-bind('props.color')
+  background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+  color: transparent;
+  background-clip: text;
 }
 .navbar {
-  padding: 1.25rem 0;
+  // padding: 1.25rem 0;
+  height: 60px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
   position: relative;
   z-index: 100;
+  &:hover{
+    background-color: rgba(0, 0, 0, 0.68);
+  }
 }
 
 /* 粘性导航栏样式 */
@@ -178,17 +198,12 @@ onUnmounted(() => {
   top: 0;
   left: 0;
   right: 0;
-  padding: 0.75rem 0;
+  // padding: 0.75rem 0;
+  height:60px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   background-color: rgba(255, 255, 255, 0.68);
   backdrop-filter: blur(10px);
   animation: slideDown 0.3s ease;
-  :deep(.nav-item_text){
-    color: #000;
-  }
-  .nickname{
-    color: #000;
-  }
 }
 
 @keyframes slideDown {
@@ -208,6 +223,7 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  height: 100%;
 }
 
 /* Logo 样式 */
@@ -361,7 +377,9 @@ onUnmounted(() => {
   justify-content: center;
 }
 .user-info{
-   color: v-bind('props.color');
+   background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+   color:transparent;
+   background-clip: text;
    cursor: pointer;
   .user-avatar{
     width: 36px;

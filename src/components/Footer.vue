@@ -1,10 +1,10 @@
 <template>
-  <footer class="footer">
+  <footer class="footer" id="footer">
     <div class="container">
       <div class="footer-content">
         <div class="footer-logo">
-          <h3>我的个人博客</h3>
-          <p>分享我的学习心得和技术日记</p>
+          <h3>心情日记网</h3>
+          <p>分享我的心情日记</p>
         </div>
         
         <div class="footer-links">
@@ -12,7 +12,6 @@
           <ul>
             <li><router-link to="/">首页</router-link></li>
             <li><router-link to="/articles">日记</router-link></li>
-            <li><router-link to="/about">关于</router-link></li>
           </ul>
         </div>
         
@@ -24,22 +23,33 @@
       </div>
       
       <div class="footer-bottom">
-        <p>&copy; {{ new Date().getFullYear() }} 我的个人博客. 保留所有权利.</p>
+        <p><a href="/file/disclaimer.html" target="_blank">| 免责声明 |</a></p>
+        <p>本网站部分内容来源于网络，仅供学习和参考之用。</p>
+        <p>本网站一切内容不代表本网站的立场，不承担任何责任。</p>
+        <p>如无意中侵犯了您的权益，请及时通过电子邮件(2842688813@qq.com)告知我们，本网站将立即删除。</p>
+        <p class="footer-beian">
+          <img src="../assets/img/gn_logo.png" alt="" width="16px">
+          <a href="https://beian.mps.gov.cn/#/query/webSearch?code=36011102001172" rel="noreferrer" target="_blank">赣公网安备36011102001172号</a>
+          <a href="https://beian.miit.gov.cn" target="_blank">赣ICP备2025074131号</a>
+        </p>
       </div>
     </div>
   </footer>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .footer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   background-color: #35495e;
   color: white;
   padding: 3rem 0 1.5rem;
-  /* margin-top: 3rem; */
 }
 
 .container {
   max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
   padding: 0 2rem;
 }
@@ -97,12 +107,28 @@
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.footer-bottom p {
-  color: rgba(255, 255, 255, 0.5);
-  margin-bottom: 0;
+.footer-bottom p,
+.footer-bottom a {
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 4px;
   font-size: var(--font-size-sm);
+  transition: color 0.3s ease;
 }
-
+.footer-beian{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  a{
+    margin: 0;
+    color: #409EFF;
+  }
+  p{
+    margin: 0;
+  }
+  a:nth-of-type(2){
+    margin-left: 20px;
+  }
+}
 @media (max-width: 768px) {
   .footer-content {
     grid-template-columns: 1fr;

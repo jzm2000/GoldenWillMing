@@ -1,24 +1,38 @@
 <template>
-  <div class="diary-card" @click="navigateToDiary">
+  <div class="diary-card">
     <div class="diary-card-header">
-      <span class="diary-date">{{ formatDate(diary.created_at) }}</span>
-      <span class="diary-category">{{ getCategoryName() }}</span>
+      <div class="diary-user">
+        <div class="user-avatar">
+          <img :src="diary.avatar || defaultAvatar" :alt="diary.nickname || '用户头像'">
+        </div>
+        <div class="user-name-date">
+          <div class="user-name">{{ diary.author_name || '未命名用户' }}</div>
+          <span class="diary-date">{{ formatDate(diary.created_at) }}</span>
+        </div>
+      </div>
+      
+      <span class="diary-category">{{diary.categoryName || '未知分类' }}</span>
     </div>
-    <h3 class="diary-card-title">{{ diary.title }}</h3>
-    <p class="diary-card-excerpt">{{ diary.content }}</p>
+    <h3 class="diary-card-title" @click="navigateToDiary">{{ diary.title }}</h3>
+    <p class="diary-card-excerpt">{{ diary.content.slice(0,100) }} {{ diary.content.length > 100 ? '...' : '' }}</p>
     <div class="diary-card-footer">
       <div class="diary-card-stats">
-        <span class="stat">
-          <i :class="['iconfont',diary.isLiked ? 'icon-aixin1' : 'icon-aixin']"></i>
-          {{ diary.likeNum }}
-        </span>
-        <span class="stat">
-          <span class="iconfont icon-pinglun"></span>
-          {{ diary.comments || 0 }}
-        </span>
-        <span class="stat">
-          <span class="iconfont icon-yanjing_xianshi_o" style="font-size:1.6rem"></span>
-          {{ diary.views || 0 }}
+        <div class="stat-group">
+          <span class="stat" @click.stop="likeDiaryHandle(diary)">
+            <i :class="['iconfont',diary.isLiked ? 'icon-aixin1' : 'icon-aixin']"></i>
+            {{ diary.likeNum }}
+          </span>
+          <span class="stat" @click="navigateToDiary">
+            <span class="iconfont icon-pinglun"></span>
+            {{ diary.commentNum || 0 }}
+          </span>
+          <span class="stat">
+            <span class="iconfont icon-yanjing_xianshi_o" style="font-size:1.6rem"></span>
+            {{ diary.views || 0 }}
+          </span>
+        </div>
+        <span class="stat" @click.stop="openEditDiary(diary)" v-if="isEdit">
+          <span class="iconfont icon-bianji"></span>
         </span>
       </div>
       <div class="diary-card-tags">
@@ -37,7 +51,10 @@
 <script setup>
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-
+import { likeDiary } from "@/api/index.js";
+import { useUserStore } from "@/store/user.js";
+import { useDiaryStore } from "@/store/diary.js";
+import defaultAvatar from '@/assets/img/1.jpg'
 const props = defineProps({
   diary: {
     type: Object,
@@ -50,18 +67,54 @@ const props = defineProps({
   tags: {
     type: Array,
     default: () => []
+  },
+  isEdit: {
+    type: Boolean,
+    default: false
   }
 })
 
+const userStore = useUserStore();
+const diaryStore = useDiaryStore();
 const router = useRouter()
 
+// 点赞日记
+function likeDiaryHandle(item){
+  likeDiary({
+    id:item.id,
+    userId:userStore.userInfo.id,
+    authorId:item.author_id,
+    action:item.isLiked ? 'unlike' : 'like'
+  }).then(res=>{
+    if(res.code==200){
+      item.isLiked = item.isLiked ? 0 : 1;
+      item.likeNum = item.isLiked ? item.likeNum + 1 : item.likeNum - 1;
+    }
+  })
+};
+
 const navigateToDiary = () => {
-  console.log('跳转日记详情');
+  router.push({
+    name:"ArticleDetail",
+    params:{
+      id:props.diary.id
+    }
+  });
+}
+
+const openEditDiary = (diary) => {
+  router.push({
+    path: '/write-diary',
+    query: {
+      id: diary.id,
+      isEdit:true
+    }
+  });
+  diaryStore.setDiaryInfo(diary);
 }
 
 const getCategoryName = () => {
   const category = props.categories.find(cat => cat.id === props.diary.category_id);
-  console.log(props.diary);
   return category ? category.title : '未知'
 }
 
@@ -84,11 +137,11 @@ const formatDate = (dateString) => {
 
 <style lang="scss" scoped>
 .diary-card {
-  background-color: white;
+  background-color: var(--card-bg);
   border-radius: 16px;
   padding: 1.5rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  cursor: pointer;
+  // cursor: pointer;
   transition: all 0.3s ease;
   border: 1px solid transparent;
   height: 100%;
@@ -108,7 +161,7 @@ const formatDate = (dateString) => {
   align-items: center;
   margin-bottom: 1rem;
   font-size: 0.875rem;
-  color: var(--text-light);
+  color: var(--text-color);
 }
 
 .diary-date {
@@ -128,13 +181,14 @@ const formatDate = (dateString) => {
   font-size: 1.3rem;
   font-weight: 600;
   margin-bottom: 0.75rem;
-  color: var(--text-dark);
+  color: var(--text-color);
   line-height: 1.4;
+  cursor: pointer;
 }
 
 .diary-card-excerpt {
   font-size: 1rem;
-  color: var(--text-medium);
+  color: var(--text-color);
   line-height: 1.6;
   margin-bottom: 1rem;
   flex: 1;
@@ -146,16 +200,20 @@ const formatDate = (dateString) => {
 
 .diary-card-stats {
   display: flex;
-  gap: 1.2rem;
-  margin-bottom: 0.75rem;
+  justify-content: space-between;
+  align-items: center;
 }
-
+.stat-group{
+  display: flex;
+  gap: 1.2rem;
+}
 .diary-card-stats .stat {
   display: flex;
   align-items: center;
   gap: 0.25rem;
   font-size: 0.875rem;
   color: var(--text-light);
+  cursor: pointer;
 }
 
 .diary-card-stats .iconfont {
@@ -167,7 +225,22 @@ const formatDate = (dateString) => {
   gap: 0.5rem;
   flex-wrap: wrap;
 }
-
+.diary-user{
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  .user-avatar{
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    img{
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+}
 .diary-tag {
   padding: 0.25rem 0.5rem;
   background-color: #f5f5f5;

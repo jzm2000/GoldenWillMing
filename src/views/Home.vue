@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <section class="hero">
-      <Navbar v-if="route.name == 'Home'" :color="primaryColor"/>
+      <!-- <Navbar v-if="route.name == 'Home'" :color="primaryColor"/> -->
       <div class="container">
         <div class="hero-content">
           <div class="flex_box">
@@ -19,7 +19,7 @@
 
     <div class="bg_cover">
       <section class="featured">
-        <div class="container">
+        <div class="container feature-diary-content">
           <div class="left-user_info">
             <div class="user-info">
               <div class="user-avatar">
@@ -41,11 +41,17 @@
                 </li> 
               </ul>
             </div>
+            <div class="search-box">
+              <GInput placeholder="搜索日记" v-model="searchQuery" />
+            </div>
+            <div class="date-picker">
+              <n-date-picker panel type="date" @update:value="handleDatePickerFocus" />
+            </div>
           </div>
           <div class="right-diary_list">
             <div class="diary-title">精选日记</div>
-            <div class="diary-content">
-              <div class="diary-list" v-for="(item) in diaryList" :key="item.id">
+            <ul class="diary-content">
+              <li class="diary-list" v-for="(item) in diaryList" :key="item.id">
                 <div class="diary-item">
                   <div class="diary-item-header">
                     <div class="diary-item-avatar">
@@ -60,27 +66,36 @@
                       <span class="diary-item-views" v-if="item.viewCount">{{item.viewCount}} 浏览</span>
                     </div>
                   </div>
-                  <div class="diary-item-title">{{item.title}}</div>
-                  <div class="diary-item-content">{{item.content}}</div>
+                  <h2 class="diary-item-title" @click="commentDiary(item.id)">{{item.title}}</h2>
+                  <div class="diary-item-content">{{item.content.slice(0,100)}} {{ item.content.length > 100 ? '...' : '' }}</div>
                   <div class="diary-item-footer">
-                    <button class="diary-item-like" @click="likeDiaryHandle(item)">
+                    <div class="diary-item-like" @click="likeDiaryHandle(item)">
                       <i :class="['iconfont',item.isLiked ? 'icon-aixin1' : 'icon-aixin']"></i>
                       {{ item.likeNum }}
-                    </button>
-                    <button class="diary-item-comment" @click="commentDiary(item.id)">
+                    </div>
+                    <div class="diary-item-comment" @click="commentDiary(item.id)">
                       <i class="iconfont icon-pinglun"></i>
                       {{ item.commentNum }}
-                    </button>
-                    <button class="diary-item-view" @click="viewDiary(item.id)">
-                      <i class="iconfont icon-yanjing_xianshi_o" style="font-size: 1.7rem;"></i>
+                    </div>
+                    <div class="diary-item-view" @click="viewDiary(item.id)">
+                      <i class="iconfont icon-yanjing_xianshi_o"></i>
                       {{item.viewCount}}
-                    </button>
+                    </div>
                   </div>
                   <!-- 评论区 -->
                    
                 </div>
+              </li>
+              <div class="load-more" v-loading="isLoading"></div>
+              <div class="not_diary" v-if="diaryList.length===0">
+                <div class="empty-icon">
+                  📓
+                </div>
+                <div class="empty-title">暂无日记</div>
+                <div class="empty-subtitle">还没有任何日记内容，来写第一篇吧！</div>
+                <button class="empty-button" @click="toWriteDiary">去写日记</button>
               </div>
-            </div>
+            </ul>
           </div>
         </div>
       </section>
@@ -90,7 +105,7 @@
           <div class="newsletter-content">
             <h2>订阅我的更新</h2>
             <p>获取最新日记和技术资讯，直接发送到您的邮箱</p>
-            <form class="newsletter-form">
+            <form class="newsletter-form" @submit.prevent="subscribeNewsletter">
               <input type="email" placeholder="您的邮箱地址" class="email-input" />
               <button type="submit" class="btn btn-primary">订阅</button>
             </form>
@@ -99,35 +114,44 @@
       </section>
     </div>
 
-    <img src="@/assets/img/banner2.png" alt="" class="mainBanner">
+    <img src="@/assets/img/banner5.png" alt="" class="mainBanner">
   </div>
 </template>
 
 <script setup lang="jsx">
 import Navbar from '@/components/Navbar.vue'
-import { ref,reactive,onMounted,onUnmounted,onBeforeMount } from 'vue'
+import { ref,reactive,onMounted,onUnmounted,onBeforeMount,nextTick } from 'vue'
 import { getUserInfo,getPublicDiaryList,likeDiary } from "@/api/index.js";
 import { useArticleStore } from '../store/article'
 import useCssVariables from '@/utils/useCssVariables';
 import avatar from "@/assets/img/1.jpg";
 import { useUserStore } from '@/store/user.js';
 import { useMessage } from "naive-ui";
+import GInput from '@/components/GoldUI/g-input/input.vue';
+import { _throttle } from "@/utils/tool.js";
 const message = useMessage();
 
 const userStore = useUserStore();
 
 const {getVariable} = useCssVariables();
 
-import {useRoute} from 'vue-router';
+import {useRoute,useRouter} from 'vue-router';
 const articleStore = useArticleStore();
 const route = useRoute();
+const router = useRouter();
 let heroText = ref(null);
-let textList = ['天不生我金志明，人间万古如长夜。','日记里藏着时光的秘密。','日记是心灵的镜像，映照出最真实的自己。','日记是成长的刻度，标记着每一步蜕变。'];
+let textList = ['日记里藏着时光的秘密。','日记是心灵的镜像，映照出最真实的自己。','日记是成长的刻度，标记着每一步蜕变。'];
 let textIndex = 0;
 let interval = null;
 let timeout = null;
 let primaryColor = getVariable('--secondary-color');
-const latestArticles = ref(articleStore.getLatestArticles(3));
+let searchQuery = ref('');
+let queryParams = {
+  pageSize:10,
+  pageNum:1
+};
+let selectedDate = ref('');
+let scrollTop = ref(0);
 const hoveredArticle = ref(null)
 const diaryList = ref([]);
 const userInfo = reactive({
@@ -138,18 +162,36 @@ const userInfo = reactive({
   likeNum: 0,
   diaryNum:0,
 });
+let isLoading = ref(false);
+let total = ref(0);
 
-// 逻辑业务的函数
+const intersectionObserver = {
+   featureDiary:null,
+   diaryList:null
+};
 // 公开日记列表初始化
 function initData(){
+  isLoading.value = true;
   getPublicDiaryList({
-    userId:userStore.userInfo.id
-  }).then(res=>{
+    userId:userStore.userInfo.id,
+    ...queryParams,
+    title:searchQuery.value,
+  }).then(async res=>{
     if(res.code === 200){
-      diaryList.value = res.data.rows || [];
+      if(queryParams.pageNum === 1){
+        diaryList.value = res.data.rows || [];
+      }else {
+        diaryList.value = [...diaryList.value,...res.data.rows || []];
+      };
+      await nextTick()
+      let arr = document.querySelectorAll(".diary-list");
+      intersectionObserverHandle(arr);
+      total.value = res.data.total || 0;
     }else {
       message.error(res.msg);
-    }
+    };
+    
+    isLoading.value = false;
   })
 }
 // 点赞日记
@@ -157,6 +199,7 @@ function likeDiaryHandle(item){
   likeDiary({
     id:item.id,
     userId:userStore.userInfo.id,
+    authorId:item.author_id,
     action:item.isLiked ? 'unlike' : 'like'
   }).then(res=>{
     if(res.code==200){
@@ -167,13 +210,25 @@ function likeDiaryHandle(item){
 };
 // 评论日记
 function commentDiary(id){
-  message.warning("评论功能正在开发中。。。")
+  router.push({
+    name:"ArticleDetail",
+    params:{
+      id:id
+    }
+  });
 };
 // 查看日记
 function viewDiary(id){
 
 };
-
+function toWriteDiary(){
+  router.push({
+    path:"write-diary",
+  })
+}
+const handleDatePickerFocus = (e,date) => {
+  console.log(date)
+};
 // 获取用户信息
 const getUserInfoHandle = async () => {
   let res = await getUserInfo();
@@ -184,19 +239,20 @@ const getUserInfoHandle = async () => {
     });
     userInfo.avatar = res.data.avatar || avatar;
   }else {
-    message.error(res.msg);
+    // message.error(res.msg);
   }
 };
 
-// 函数执行
+// 订阅新闻邮件
+function subscribeNewsletter(){
+  message.info('正在开发中。。。');
+}
+
 onBeforeMount(async ()=>{
   await getUserInfoHandle();
   initData();
 })
 
-
-
-//逻辑业务的函数
 // 格式化日期
 const formatDate = (dateString) => {
   const date = new Date(dateString)
@@ -246,14 +302,59 @@ const simulateTyping = (text, element,status = 1,delay = 100) => {
       index++;
     }
   }, delay);
-}; 
+};
+// 触底加载
+const loadDiaryMore = () => {
+  let fHeight = document.querySelector('#footer').offsetHeight;
+  // 可滚动长度减去footer的高度和订阅更新的高度和精选日记的padding-bottom
+  if(window.scrollY > document.documentElement.scrollHeight - document.documentElement.clientHeight - 300 - fHeight - 96 - 16){
+    if(isLoading.value) return;
+    if(diaryList.value.length >= total.value){
+      console.log('没有更多日记了');
+      return;
+    }else {
+      queryParams.pageNum++;
+      initData();
+    }
+  }
+};
+const intersectionObserverHandle = (arr) => {
+  intersectionObserver.diaryList = new IntersectionObserver((entries) => {
+    entries.forEach(item=>{
+      if (item.intersectionRatio <= 0) return;
+      item.target.style.opacity = 1;
+      item.target.style.transform = 'translateX(0)';
+      intersectionObserver.diaryList.unobserve(item.target);
+    })
+  },{ threshold: 0.2 });
+  arr.forEach(item=>{
+    intersectionObserver.diaryList.observe(item);
+  });
+};
 onMounted(()=>{
-  simulateTyping(textList[textIndex], heroText.value)
+  simulateTyping(textList[textIndex], heroText.value);
+  window.addEventListener('scroll',(loadDiaryMore));
+
+  intersectionObserver.featureDiary = new IntersectionObserver((entries) => {
+    if (entries[0].intersectionRatio <= 0) return;
+    Array.from(entries[0].target.children).forEach(item=>{
+      item.style.opacity = 1;
+      item.style.transform = 'translateX(0)';
+    });
+  },{ threshold: 0.1 });
+  intersectionObserver.featureDiary.observe(document.querySelector(".left-user_info"));
+
+
 });
 onUnmounted(()=>{
+  // 移除滚动事件监听
+  window.removeEventListener('scroll',(loadDiaryMore));
   clearInterval(interval);
   clearTimeout(timeout);
-})
+  intersectionObserver.diaryList.disconnect();
+  intersectionObserver.featureDiary.disconnect();
+
+});
 </script>
 
 <style scoped lang="scss">
@@ -268,19 +369,16 @@ onUnmounted(()=>{
     width: 100%;
   }
   .bg_cover{
-    background-color: rgba(249, 245, 235,0.6);
-
+    background: rgba(var(--primary-rgb),0.6);
   }
 }
 /* Hero Section */
 .hero {
-  /* background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); */
-  // background: url('@/assets/img/banner2.jpg') no-repeat center center;
   background-size: 100%;
   color: white;
   position: relative;
   overflow: hidden;
-  min-height: 100vh;
+  min-height: calc(100vh - 60px);
   .container{
      position: absolute;
      inset: 0;
@@ -435,7 +533,7 @@ onUnmounted(()=>{
     width: 300px;
     .user-info {
       background-color: var(--card-bg);
-      border-radius: 16px;
+      border-radius: 0.75rem;
       padding: 2rem;
       box-shadow: var(--shadow);
       transition: all 0.3s ease;
@@ -529,9 +627,35 @@ onUnmounted(()=>{
         }
       }
     }
+    .user-info{
+      opacity: 0;
+      transform: translateX(-50px);
+      transition: all 0.5s ease;
+    }
+    .search-box{
+      opacity: 0;
+      transform: translateX(-100px);
+      transition: all 0.5s ease;
+    }
+    .date-picker{
+      opacity: 0;
+      transform: translateX(-150px);
+      transition: all 0.5s ease;
+    }
   }
   .right-diary_list{
     flex: 1;
+  }
+}
+.search-box{
+  background-color: var(--card-bg);
+  border-radius: 0.75rem;
+  padding: 0.5rem 1rem;
+  margin-top: 1rem;
+  transition: all 0.3s ease;
+  &:hover{
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-hover);
   }
 }
 .view-all-link {
@@ -562,10 +686,16 @@ onUnmounted(()=>{
 
 /* Newsletter Section */
 .newsletter {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   background: linear-gradient(135deg, var(--primary-light) 0%, var(--accent-color) 100%);
   color: white;
-  padding: 5rem 0;
+  height: 300px;
   text-align: center;
+  .container{
+    width: 100%;
+  }
 }
 
 .newsletter-content {
@@ -663,7 +793,7 @@ onUnmounted(()=>{
 }
 .hero-text-box{
   margin: 20px auto;
-  padding: 16px;
+  padding: 0.75rem;
   background: rgba(51, 47, 43, 0.4);
   justify-content: center;
   border-radius: 8px;
@@ -718,11 +848,20 @@ onUnmounted(()=>{
   flex-direction: column;
   gap: 2rem;
   margin-bottom: 1rem;
+  opacity: 0;
+  transform: translateX(20px);
+  transition: all 0.5s ease;
 }
-
+.diary-content > .diary-list:last-of-type {
+  margin-bottom: 0;
+  .diary-item{
+    border-bottom-left-radius: 0rem;
+    border-bottom-right-radius: 0rem;
+  }
+}
 .diary-item {
   background-color: var(--card-bg);
-  border-radius: 16px;
+  border-radius: 0.75rem;
   padding: 2rem;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
@@ -780,17 +919,17 @@ onUnmounted(()=>{
 }
 
 .diary-item-title {
-  font-size: var(--font-size-xl);
   font-weight: 600;
-  color: var(--text-dark);
+  color: var(--text-color);
   margin-bottom: 1rem;
   line-height: 1.4;
+  cursor: pointer;
 }
 
 .diary-item-content {
   font-size: var(--font-size-base);
   color: var(--text-medium);
-  line-height: 1.8;
+  line-height: 1;
   margin-bottom: 1.5rem;
   text-align: justify;
 }
@@ -798,11 +937,13 @@ onUnmounted(()=>{
 .diary-item-footer {
   display: flex;
   gap: 1rem;
+  align-items: center;
   button{
     color: unset;
   }
   .iconfont{
     font-size: 1.5rem;
+    line-height: 1;
   }
 }
 
@@ -820,6 +961,7 @@ onUnmounted(()=>{
   padding: 0.2rem;
   border-radius: 8px;
   transition: all 0.3s ease;
+  line-height: 1;
 }
 
 .diary-item-like:hover,
@@ -828,6 +970,87 @@ onUnmounted(()=>{
 .diary-item-view:hover {
   background-color: var(--bg-color);
   transform: scale(1.1);
+}
+
+.not_diary{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  color: var(--text-medium);
+  background-color:var(--card-bg);
+  border-radius: 0.75rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  height: 260px;
+  padding: 2rem;
+  text-align: center;
+  
+  &:hover{
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.1);
+  }
+  
+  .empty-icon {
+    font-size: 2rem;
+    color: var(--primary-light);
+    margin-bottom: 1rem;
+    opacity: 0.6;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      transform: scale(1.1) rotate(5deg);
+      opacity: 0.8;
+    }
+  }
+  
+  .empty-title {
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 0.5rem;
+  }
+  
+  .empty-subtitle {
+    font-size: var(--font-size-base);
+    color: var(--text-light);
+    margin-bottom: 1.5rem;
+    max-width: 200px;
+  }
+  
+  .empty-button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 1.5rem;
+    font-size: var(--font-size-base);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      background-color: var(--primary-light);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(158, 31, 54, 0.2);
+    }
+    
+    &:active {
+      transform: translateY(0);
+    }
+  }
+}
+.date-picker{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1rem;
+  background-color: var(--card-bg);
+  border-radius: 0.75rem;
+}
+.load-more{
+  height: 80px;
+  width: 100%;
 }
 
 @media (max-width: 768px) {

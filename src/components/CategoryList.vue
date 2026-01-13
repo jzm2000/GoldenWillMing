@@ -9,7 +9,7 @@
       >
         <span class="category-icon">📋</span>
         <span class="category-name">全部日记</span>
-        <span class="category-count">({{ totalCount() }})</span>
+        <span class="category-count">({{ totalCount }})</span>
       </li>
       <li 
         v-for="category in categories" 
@@ -20,7 +20,7 @@
       >
         <span class="category-icon">{{ category.icon }}</span>
         <span class="category-name">{{ category.title }}</span>
-        <!-- <span class="category-count">({{ getCategoryCount(category.id) }})</span> -->
+        <span class="category-count">({{ category.diaryNum }})</span>
       </li>
     </ul>
   </div>
@@ -39,6 +39,10 @@ const props = defineProps({
   activeCategory: {
     type: [String,Number],
     default: 'all'
+  },
+  totalCount: {
+    type: Number,
+    default: 0
   }
 })
 
@@ -48,10 +52,6 @@ const selectCategory = (categoryId) => {
   emit('category-change', categoryId)
 }
 
-const totalCount = () => {
-  return props.diaries.length
-}
-
 const getCategoryCount = (categoryId) => {
   return props.diaries.filter(diary => diary.categoryId === categoryId).length
 }
@@ -59,7 +59,7 @@ const getCategoryCount = (categoryId) => {
 
 <style lang="scss" scoped>
 .categories-section {
-  background-color: white;
+  background-color: var(--card-bg);
   border-radius: 16px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;

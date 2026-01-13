@@ -3,12 +3,12 @@
     <!-- 页面标题区域 -->
     <header class="diary-header">
       <div class="container">
-        <h1 class="diary-title" data-text="我的日记空间">我的日记空间</h1>
+        <h1 class="diary-title" data-text="日记大厅">日记大厅</h1>
         <p class="diary-subtitle">记录生活点滴，珍藏美好回忆</p>
         <div class="diary-stats">
           <span class="stat-item">
             <span class="stat-icon">📝</span>
-            <span class="stat-number">{{ totalDiaries }}</span>
+            <span class="stat-number">{{ allDiaryNum }}</span>
             <span class="stat-label">篇日记</span>
           </span>
           <span class="stat-item">
@@ -31,26 +31,28 @@
               <div class="search-input-wrapper">
                 <input 
                   type="text" 
-                  v-model="searchQuery" 
+                  v-model="searchForm.searchQuery" 
                   placeholder="搜索日记内容..." 
                   class="search-input"
+                  @keyup.enter="initData(true)"
                 />
-                <span class="search-icon">🔍</span>
+                <span class="search-icon" @click="initData(true)">🔍</span>
               </div>
             </div>
 
             <!-- 分类列表组件 -->
             <CategoryList 
               :categories="categories" 
-              :diaries="diaries" 
-              :active-category="activeCategory"
+              :diaries="diaries"
+              :total-count="allDiaryNum"
+              :active-category="searchForm.activeCategory"
               @category-change="onCategoryChange"
             />
 
             <!-- 标签云组件 -->
             <TagsCloud 
               :tags="tags" 
-              :selected-tags="selectedTags"
+              :selected-tags="searchForm.selectedTags"
               @tag-toggle="onTagToggle"
               @clear-tags="clearAllTags"
             />
@@ -70,17 +72,18 @@
             <div class="diary-filters">
               <div class="filters-left">
                 <span class="filter-info">
-                  共找到 {{ filteredDiaries.length }} 篇日记
+                  共找到 {{ diaries.length }} 篇日记
                 </span>
-                <span v-if="activeCategory !== 'all'" class="filter-active">
-                  分类: {{ getCategoryName(activeCategory) }}
+                <span v-if="searchForm.activeCategory !== 'all'" class="filter-active">
+                  分类: {{ getCategoryName(searchForm.activeCategory) }}
                 </span>
-                <span v-if="selectedTags.length > 0" class="filter-active">
-                  标签: {{ selectedTags.length }} 个
+                <span v-if="searchForm.selectedTags.length > 0" class="filter-active">
+                  标签: {{ searchForm.selectedTags.length }} 个
                 </span>
               </div>
               <div class="filters-right">
-                <select v-model="sortBy" class="sort-select">
+                <n-date-picker v-model:value="searchForm.createTime" type="datetime" clearable />
+                <select v-model="searchForm.sortBy" class="sort-select">
                   <option value="newest">最新优先</option>
                   <option value="oldest">最早优先</option>
                   <option value="popular">最受欢迎</option>
@@ -103,7 +106,7 @@
             </div>
 
             <!-- 空状态 -->
-            <div v-if="filteredDiaries.length === 0" class="empty-state">
+            <div v-if="diaries.length === 0" class="empty-state">
               <div class="empty-icon">📝</div>
               <h3>暂无符合条件的日记</h3>
               <p class="flex justify-center items-center" style="column-gap:0.5rem;">尝试调整筛选条件或<button class="create-diary-btn small" @click="writeNewDiary">创建新的日记</button></p>
@@ -113,12 +116,21 @@
             </div>
 
             <!-- 分页组件 -->
-            <Pagination 
-              v-if="filteredDiaries.length > 0"
+            <!-- <Pagination 
+              v-if="totalPages > 1"
               :total-pages="totalPages"
-              :current-page="queryParams.pageNum"
+              v-model:current-page="queryParams.pageNum"
               @page-change="onPageChange"
-            />
+            /> -->
+            <div class="pagination-container">
+              <n-pagination 
+                v-model:page="queryParams.pageNum" 
+                show-quick-jumper 
+                :display-order="['quick-jumper', 'pages']"
+                :item-count="totalPages" 
+                @update:page="onPageChange" 
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -127,12 +139,12 @@
     <!-- 最近活动区域 -->
     <section class="recent-activities">
       <div class="container">
-        <h2 class="section-title">最近活动</h2>
+        <h2 class="section-title">最新消息</h2>
         <div class="activities-list">
           <div v-for="activity in recentActivities" :key="activity.id" class="activity-item">
             <span class="activity-icon">{{ activity.icon }}</span>
-            <span class="activity-text">{{ activity.text }}</span>
-            <span class="activity-time">{{ activity.time }}</span>
+            <span class="activity-text">{{ activity.message }}</span>
+            <span class="activity-time">{{ activity.updated_at }}</span>
           </div>
         </div>
       </div>
@@ -144,8 +156,8 @@
 import { ref, onMounted, reactive,computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useArticleStore } from '@/store/article'
-
-import { getDiaryList,categoryList } from "@/api/index.js"
+import { useUserStore } from "@/store/user"
+import { getDiaryList,getPublicDiaryList,publicCategoryList,categoryList,getRecentNews } from "@/api/index.js"
 
 import DiaryCard from '@/components/DiaryCard.vue'
 import CategoryList from '@/components/CategoryList.vue'
@@ -154,14 +166,16 @@ import Pagination from '@/components/Pagination.vue'
 
 const router = useRouter()
 const articleStore = useArticleStore()
-
+const userStore = useUserStore()
 // 状态管理
-const searchQuery = ref('')
-const activeCategory = ref('all')
-const selectedTags = ref([])
-const sortBy = ref('newest')
-const currentPage = ref(1)
-const pageSize = ref(6)
+const searchForm = reactive({
+  searchQuery:'',
+  activeCategory:'',
+  selectedTags:[],
+  sortBy:'newest',
+  createTime:null
+});
+
 const queryParams = reactive({
   pageSize:10,
   pageNum:1,
@@ -187,48 +201,30 @@ const tags = ref([
   { id: 8, name: '反思' }
 ])
 
-const diaries = ref([
-  {
-    id: 1,
-    title: '春日午后的咖啡时光',
-    excerpt: '阳光透过窗户洒在桌角，捧着一杯热咖啡，感受着春天的气息...',
-    content: '详细内容...',
-    date: '2023-04-15',
-    categoryId: 'life',
-    tags: [1, 5],
-    likes: 24,
-    comments: 3,
-    views: 156
-  },
-])
+const diaries = ref([]);
 
-const recentActivities = ref([
-  { id: 1, icon: '❤️', text: '张三点赞了你的日记', time: '1小时前' },
-  { id: 2, icon: '💬', text: '李四评论了你的日记', time: '3小时前' },
-  { id: 3, icon: '📝', text: '你创建了新日记《春日午后的咖啡时光》', time: '昨天' }
-])
+const recentActivities = ref([]);
 
 // 计算属性
-const totalDiaries = computed(() => diaries.value.length)
 
 const filteredDiaries = computed(() => {
   let result = diaries.value
   
   // 按分类筛选
-  if (activeCategory.value !== 'all') {
-    result = result.filter(diary => diary.categoryId === activeCategory.value)
+  if (searchForm.activeCategory !== 'all') {
+    result = result.filter(diary => diary.categoryId === searchForm.activeCategory)
   }
   
   // 按标签筛选
-  if (selectedTags.value.length > 0) {
+  if (searchForm.selectedTags.length > 0) {
     result = result.filter(diary => 
-      selectedTags.value.some(tagId => diary.tags.includes(tagId))
+      searchForm.selectedTags.some(tagId => diary.tags.includes(tagId))
     )
   }
   
   // 按搜索关键词筛选
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
+  if (searchForm.searchQuery) {
+    const query = searchForm.searchQuery.toLowerCase()
     result = result.filter(diary => 
       diary.title.toLowerCase().includes(query) || 
       diary.excerpt.toLowerCase().includes(query)
@@ -236,7 +232,7 @@ const filteredDiaries = computed(() => {
   }
   
   // 排序
-  switch (sortBy.value) {
+  switch (searchForm.sortBy) {
     case 'newest':
       result.sort((a, b) => new Date(b.date) - new Date(a.date))
       break
@@ -253,68 +249,91 @@ const filteredDiaries = computed(() => {
 
 const totalPages = ref(0);
 
-const paginatedDiaries = computed(() => {
-  const startIndex = (currentPage.value - 1) * pageSize.value
-  const endIndex = startIndex + pageSize.value
-  return filteredDiaries.value.slice(startIndex, endIndex)
-})
 
 // 事件处理方法
-const initData = () =>{
-  getDiaryList({
+const initData = (isSearch = false) =>{
+  if(isSearch){
+    queryParams.pageNum = 1;
+  };
+  getPublicDiaryList({
     ...queryParams,
-    categoryId:activeCategory.value || undefined,
-    title:searchQuery.value
+    categoryId:searchForm.activeCategory || undefined,
+    title:searchForm.searchQuery,
+    userId:userStore.userInfo.id
   }).then(res=>{
     if(res.code==200){
       diaries.value = res.data.rows;
       totalPages.value = res.data.total;
+    }else{
+      diaries.value = [];
+      totalPages.value = 0;
     }
   })
 };
 
 const onCategoryChange = (categoryId) => {
-  activeCategory.value = categoryId
+  searchForm.activeCategory = categoryId
   queryParams.pageNum = 1;
   initData();
 }
 // 获取分类列表
 const getCategoryList = async() =>{
-  let res = await categoryList();
+  let res = await publicCategoryList();
     if(res.code==200){
       categories.value = res.data;
-      activeCategory.value = '';
+      searchForm.activeCategory = '';
       initData();
     }else{
       categories.value = [];
     }
 }
-
+// 获取最新消息
+const getRecentNewsList = async() =>{
+  let res = await getRecentNews({
+    pageNum:1,
+    pageSize:10
+  });
+    if(res.code==200){
+      recentActivities.value = res.data.rows;
+      recentActivities.value.forEach(item=>{
+        item.updated_at = formatDate(item.updated_at);
+        if(item.type === 'like'){
+          item.icon = '❤️';
+        } else if(item.type === 'comment'){
+          item.icon = '💬';
+        }
+      })
+    }else{
+      recentActivities.value = [];
+    }
+};
 const onTagToggle = (tagId) => {
-  const index = selectedTags.value.indexOf(tagId)
+  const index = searchForm.selectedTags.indexOf(tagId)
   if (index > -1) {
-    selectedTags.value.splice(index, 1)
+    searchForm.selectedTags.splice(index, 1)
   } else {
-    selectedTags.value.push(tagId)
+    searchForm.selectedTags.push(tagId)
   }
-  currentPage.value = 1 // 切换标签时重置到第一页
+  queryParams.pageNum = 1; // 切换标签时重置到第一页
 }
 
 const clearAllTags = () => {
-  selectedTags.value = []
-  currentPage.value = 1 // 清除标签时重置到第一页
+  searchForm.selectedTags = []
+  queryParams.pageNum = 1; // 清除标签时重置到第一页
 }
 
 const onPageChange = (page) => {
-  currentPage.value = page
+  console.log(page);
+  queryParams.pageNum = page;
+  initData();
 }
 
 const resetFilters = () => {
-  searchQuery.value = ''
-  activeCategory.value = 'all'
-  selectedTags.value = []
-  sortBy.value = 'newest'
-  currentPage.value = 1
+  searchForm.searchQuery = ''
+  searchForm.activeCategory = ''
+  searchForm.selectedTags = []
+  searchForm.sortBy = 'newest'
+  queryParams.pageNum = 1; // 重置到第一页
 }
 
 const getCategoryName = (categoryId) => {
@@ -326,15 +345,27 @@ const getCategoryName = (categoryId) => {
 }
 // 事件执行
 getCategoryList();
+getRecentNewsList();
 
-
-
+const allDiaryNum = computed(()=>{
+  return categories.value.reduce((cur,pre)=>cur+pre.diaryNum,0);
+})
 const writeNewDiary = () => {
-  router.push({ name: 'WriteDiary',query:{ isEdit:false,categoryId:activeCategory.value } })
+  router.push({ name: 'WriteDiary',query:{ isEdit:false,categoryId:searchForm.activeCategory } })
 }
 
+const formatDate = (dateString) => {
+  const date = new Date(dateString)
+  return date.toLocaleDateString('zh-CN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
 onMounted(() => {
-  articleStore.loadArticles()
+  articleStore.loadArticles();
 })
 </script>
 
@@ -528,10 +559,6 @@ onMounted(() => {
   font-size: 1.3rem;
 }
 
-.diary-main {
-  padding-bottom: 3rem;
-}
-
 .diary-layout {
   display: grid;
   grid-template-columns: 300px 1fr;
@@ -621,7 +648,7 @@ onMounted(() => {
   align-items: center;
   margin-bottom: 2rem;
   padding: 1rem 0;
-  background-color: white;
+  background-color: var(--card-bg);
   border-radius: 16px;
   padding: 1rem 1.5rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
@@ -673,7 +700,7 @@ onMounted(() => {
   padding: 0.5rem 1rem;
   border-radius: 8px;
   border: 1px solid #e0e0e0;
-  background-color: white;
+  // background-color: white;
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -723,7 +750,7 @@ onMounted(() => {
   background-color: white;
   padding: 2rem 0;
   border-top: 1px solid #e0e0e0;
-  margin-top: 3rem;
+  margin-top: 1rem;
   animation: fadeInUp 0.8s ease-out 1s both;
 }
 
@@ -774,7 +801,12 @@ onMounted(() => {
   color: var(--text-light);
   flex-shrink: 0;
 }
-
+.pagination-container{
+  margin-top: 1rem;
+  .n-pagination{
+     justify-content: center;
+  }
+}
 // 动画定义
 @keyframes fadeInUp {
   from {
